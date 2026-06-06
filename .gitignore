@@ -1,0 +1,25 @@
+# Secretos / entorno (NUNCA subir)
+.env
+.env.*
+*.key
+*.pem
+
+# Dependencias
+node_modules/
+
+# Config local de editores / Claude Code
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# Netlify
+.netlify/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs / temporales
+*.log
+*.tmp

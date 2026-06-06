@@ -1,0 +1,297 @@
+{
+  "name": "Fontana — Reporte programado de stock",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "cron",
+      "name": "Ejecutar lunes 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SHEET_ID_PRINCIPAL"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Stock"
+        },
+        "options": {}
+      },
+      "id": "read-stock-r",
+      "name": "Leer stock reporte",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SHEET_ID_PRINCIPAL"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Movimientos"
+        },
+        "options": {}
+      },
+      "id": "read-mov-r",
+      "name": "Leer movimientos reporte",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SHEET_ID_PRINCIPAL"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pedidos"
+        },
+        "options": {}
+      },
+      "id": "read-ped-r",
+      "name": "Leer pedidos reporte",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge-r1",
+      "name": "Combinar stock + movimientos",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        860,
+        330
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge-r2",
+      "name": "Combinar con pedidos",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1160,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Genera HTML del reporte semanal\nconst stock = $('Leer stock reporte').all();\nconst movs = $('Leer movimientos reporte').all();\nconst peds = $('Leer pedidos reporte').all();\nconst ahora = new Date();\nconst fecha = ahora.toLocaleDateString('es-AR');\nconst fmt = (n) => '$' + Math.round(n || 0).toLocaleString('es-AR');\nconst hace7d = new Date(ahora.getTime() - 7*24*60*60*1000);\nconst movPeriodo = movs.filter(m => new Date(m.json.TIMESTAMP) >= hace7d);\nconst compras = movPeriodo.filter(m => m.json.TIPO_MOVIMIENTO === 'COMPRA').length;\nconst consumos = movPeriodo.filter(m => m.json.TIPO_MOVIMIENTO === 'CONSUMO_PEDIDO').length;\nconst ajustes = movPeriodo.filter(m => m.json.TIPO_MOVIMIENTO === 'AJUSTE_MANUAL').length;\nconst consumosPorSku = {};\nmovPeriodo.filter(m => m.json.TIPO_MOVIMIENTO === 'CONSUMO_PEDIDO').forEach(m => { consumosPorSku[m.json.SKU || ''] = (consumosPorSku[m.json.SKU || ''] || 0) + (parseInt(m.json.CANTIDAD) || 0); });\nconst top10 = Object.entries(consumosPorSku).sort((a, b) => b[1] - a[1]).slice(0, 10);\nconst alertas = stock.filter(s => { const m = parseInt(s.json.STOCK_MINIMO); return !isNaN(m) && m > 0 && (parseInt(s.json.STOCK) || 0) < m; });\nconst sinStock = stock.filter(s => { const m = parseInt(s.json.STOCK_MINIMO); return !isNaN(m) && m > 0 && (parseInt(s.json.STOCK) || 0) === 0; });\nconst valorTotal = stock.reduce((sum, s) => sum + ((parseInt(s.json.STOCK) || 0) * (parseFloat(s.json.PRECIO_COSTO) || 0)), 0);\nconst pendientes = peds.filter(p => p.json.ESTADO === 'PENDIENTE_MATERIAL');\nconst li = (t) => '<li>' + t + '</li>';\nlet html = '<h2>Reporte Semanal — Fontana — ' + fecha + '</h2>';\nhtml += '<p>Periodo: ' + hace7d.toLocaleDateString('es-AR') + ' al ' + fecha + '</p>';\nhtml += '<h3>Movimientos</h3><ul>' + li('Compras: ' + compras) + li('Consumos: ' + consumos) + li('Ajustes: ' + ajustes) + li('Total: ' + movPeriodo.length) + '</ul>';\nif (top10.length) { html += '<h3>Top 10 más consumidos</h3><ol>'; top10.forEach(([sku, c]) => { const it = stock.find(s => s.json.SKU === sku); html += li((it ? it.json['PRODUCTO/COLOR'] || sku : sku) + ': ' + c + ' u.'); }); html += '</ol>'; }\nif (sinStock.length || alertas.length) { html += '<h3>Alertas</h3><ul>'; sinStock.forEach(s => html += li('<span style=\"color:red\">SIN STOCK</span> ' + s.json.SKU + ' ' + (s.json['PRODUCTO/COLOR'] || ''))); alertas.filter(a => (parseInt(a.json.STOCK) || 0) > 0).forEach(s => html += li('<span style=\"color:orange\">BAJO</span> ' + s.json.SKU + ' — ' + s.json.STOCK + '/' + s.json.STOCK_MINIMO)); html += '</ul>'; }\nhtml += '<h3>Valor total del stock</h3><p><b>' + fmt(valorTotal) + '</b></p>';\nif (pendientes.length) { html += '<h3>Pedidos pendientes (' + pendientes.length + ')</h3><ul>'; pendientes.slice(0, 10).forEach(p => html += li('#' + p.json.ID_PEDIDO + ' — ' + p.json.TIPO_MUEBLE + ' ' + (p.json.COLOR || ''))); html += '</ul>'; }\nreturn [{ json: { asunto: 'Reporte Semanal Stock — Fontana — ' + fecha, cuerpo: html } }];"
+      },
+      "id": "gen-reporte",
+      "name": "Generar reporte HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "CONFIGURAR_EMAIL",
+        "subject": "={{ $json.asunto }}",
+        "emailType": "html",
+        "message": "={{ $json.cuerpo }}",
+        "options": {}
+      },
+      "id": "gmail-rep",
+      "name": "Enviar reporte por Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1760,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## TRIGGER\nCron: lunes 8am.",
+        "width": 200,
+        "height": 160,
+        "color": 3
+      },
+      "id": "sr1",
+      "name": "Nota: Trigger reporte",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        170,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## LECTURA + MERGE\n3 fuentes en paralelo, 2 merges encadenados.",
+        "width": 740,
+        "height": 440,
+        "color": 3
+      },
+      "id": "sr2",
+      "name": "Nota: Lectura reporte",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## REPORTE\nGenera HTML y envía por Gmail.",
+        "width": 480,
+        "height": 220,
+        "color": 1
+      },
+      "id": "sr3",
+      "name": "Nota: Reporte",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "Ejecutar lunes 8am": {
+      "main": [
+        [
+          {
+            "node": "Leer stock reporte",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Leer movimientos reporte",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Leer pedidos reporte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer stock reporte": {
+      "main": [
+        [
+          {
+            "node": "Combinar stock + movimientos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer movimientos reporte": {
+      "main": [
+        [
+          {
+            "node": "Combinar stock + movimientos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combinar stock + movimientos": {
+      "main": [
+        [
+          {
+            "node": "Combinar con pedidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer pedidos reporte": {
+      "main": [
+        [
+          {
+            "node": "Combinar con pedidos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combinar con pedidos": {
+      "main": [
+        [
+          {
+            "node": "Generar reporte HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar reporte HTML": {
+      "main": [
+        [
+          {
+            "node": "Enviar reporte por Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "pinData": {},
+  "active": false
+}

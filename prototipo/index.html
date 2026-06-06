@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prototipo — Ficha de Proyecto (Cantersfont)</title>
+<style>
+  :root{
+    --bg:#0f1724; --surface:#1a2332; --surface2:#1f2b3d; --card:#1e2a3a;
+    --border:#2a3a4e; --primary:#3b82f6; --primary-hover:#2563eb;
+    --text:#e2e8f0; --text-sec:#94a3b8; --text-muted:#64748b;
+    --success:#22c55e; --warning:#eab308; --danger:#ef4444;
+    --radius:12px; --radius-sm:8px; --transition:.18s ease;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45}
+  header.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:14px}
+  header.top h1{font-size:18px;margin:0}
+  header.top .sub{color:var(--text-sec);font-size:13px}
+  .proto-badge{margin-left:auto;font-size:11px;color:var(--warning);border:1px solid var(--warning);border-radius:999px;padding:3px 10px}
+  main{max-width:860px;margin:0 auto;padding:18px}
+  .hidden{display:none!important}
+  /* buttons */
+  .btn{font:inherit;border:none;border-radius:var(--radius-sm);padding:9px 16px;cursor:pointer;font-weight:600;transition:var(--transition);background:var(--surface2);color:var(--text)}
+  .btn:hover{background:var(--surface)}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-hover)}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{background:var(--surface2)}
+  .btn-sm{padding:6px 12px;font-size:13px}
+  .btn-block{width:100%}
+  .btn-ghost{background:transparent;color:var(--text-sec)}
+  /* list */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .input{font:inherit;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:9px 12px;width:100%}
+  .input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+  textarea.input{resize:vertical;min-height:64px}
+  .search{flex:1;min-width:200px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-sec);cursor:pointer}
+  .chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .proj-card{cursor:pointer;transition:var(--transition)}
+  .proj-card:hover{border-color:var(--primary);background:var(--surface2)}
+  .proj-card .row1{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .proj-card .cliente{font-weight:700}
+  .proj-card .meta{color:var(--text-sec);font-size:13px}
+  .proj-card .pid{margin-left:auto;color:var(--text-muted);font-size:12px}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em}
+  .b-ventas{background:rgba(234,179,8,.15);color:var(--warning)}
+  .b-diseno{background:rgba(59,130,246,.15);color:var(--primary)}
+  .b-prod{background:rgba(59,130,246,.15);color:#60a5fa}
+  .b-coloc{background:rgba(34,197,94,.15);color:var(--success)}
+  .b-fin{background:rgba(148,163,184,.15);color:var(--text-sec)}
+  /* ficha */
+  .ficha-head{position:sticky;top:57px;z-index:15;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .ficha-head .who{font-weight:700;font-size:16px}
+  .ficha-head .estado-wrap{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .ficha-head select{width:auto}
+  /* progress steps */
+  .steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+  .step{flex:1;min-width:120px;font-size:12px;color:var(--text-sec);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;text-align:center}
+  .step.done{border-color:var(--success);color:var(--success)}
+  .step.current{border-color:var(--primary);color:var(--primary);font-weight:700}
+  /* accordion */
+  .acc{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;background:var(--card)}
+  .acc-head{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;background:var(--surface)}
+  .acc-head:hover{background:var(--surface2)}
+  .acc-head .acc-num{width:26px;height:26px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text-sec);flex:0 0 auto}
+  .acc.open .acc-num{background:var(--primary);color:#fff}
+  .acc-head h3{margin:0;font-size:15px}
+  .acc-head .acc-sub{color:var(--text-muted);font-size:12px;margin-left:2px}
+  .acc-head .caret{margin-left:auto;color:var(--text-muted);transition:var(--transition)}
+  .acc.open .caret{transform:rotate(180deg)}
+  .acc-body{padding:16px;display:none;border-top:1px solid var(--border)}
+  .acc.open .acc-body{display:block}
+  /* form */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:620px){.grid{grid-template-columns:1fr}}
+  .fg{display:flex;flex-direction:column;gap:5px}
+  .fg.col-2{grid-column:span 2}
+  @media(max-width:620px){.fg.col-2{grid-column:span 1}}
+  label{font-size:13px;color:var(--text-sec);font-weight:600}
+  .req{color:var(--danger)}
+  .hint{font-size:12px;color:var(--text-muted)}
+  .subhead{grid-column:1/-1;font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 -4px;padding-top:6px;border-top:1px dashed var(--border)}
+  .subhead:first-child{border-top:none;padding-top:0}
+  .radio-row,.check-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  .opt{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 11px;font-size:14px;cursor:pointer}
+  .opt input{accent-color:var(--primary)}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .computed{background:var(--surface2);border-style:dashed;color:var(--text-sec)}
+  .file-drop{border:1px dashed var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center;color:var(--text-muted);font-size:13px;background:var(--surface)}
+  /* muebles */
+  .mueble{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;background:var(--surface)}
+  .mueble-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+  .mueble-head .mt{font-weight:700;font-size:14px}
+  .mueble-head .del{margin-left:auto;color:var(--danger);background:transparent;border:none;cursor:pointer;font-size:13px}
+  .mueble-body{padding:12px}
+  /* toast */
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--success);color:#06250f;padding:12px 20px;border-radius:var(--radius-sm);font-weight:700;opacity:0;transition:.3s;z-index:99}
+  #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .save-bar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:14px 0;display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Cantersfont</h1><span class="sub">Ficha de Proyecto</span>
+  <span class="proto-badge">PROTOTIPO · no guarda datos</span>
+</header>
+
+<main>
+  <!-- ===== LISTA ===== -->
+  <section id="view-lista">
+    <div class="toolbar">
+      <input id="buscar" class="input search" placeholder="🔍 Buscar por cliente, dirección, ID, vendedor..." />
+      <button class="btn btn-primary btn-sm" onclick="abrirFicha(null)">+ Nuevo proyecto</button>
+    </div>
+    <div class="chips" id="estado-chips">
+      <button class="chip active" data-estado="">Todos</button>
+      <button class="chip" data-estado="en_ventas">En ventas</button>
+      <button class="chip" data-estado="diseño">Diseño</button>
+      <button class="chip" data-estado="producción">Producción</button>
+      <button class="chip" data-estado="colocación">Colocación</button>
+      <button class="chip" data-estado="finalizado">Finalizado</button>
+    </div>
+    <div id="lista"></div>
+  </section>
+
+  <!-- ===== FICHA ===== -->
+  <section id="view-ficha" class="hidden">
+    <button class="btn btn-ghost btn-sm" onclick="volverLista()">&larr; Volver a la lista</button>
+    <div class="ficha-head">
+      <span class="who" id="ficha-cliente">—</span>
+      <span class="badge b-ventas" id="ficha-pid">NUEVO</span>
+      <div class="estado-wrap">
+        <label style="margin:0">Estado</label>
+        <select class="input" id="ficha-estado" onchange="pintarSteps()">
+          <option value="en_ventas">En ventas</option>
+          <option value="diseño">Diseño</option>
+          <option value="producción">Producción</option>
+          <option value="colocación">Colocación</option>
+          <option value="finalizado">Finalizado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div id="acc-container"></div>
+    <div class="save-bar">
+      <button class="btn btn-outline" onclick="volverLista()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardar()">💾 Guardar ficha</button>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   ESQUEMA DE CAMPOS — editá acá para corregir el formulario.
+   Tipos: text, tel, email, url, date, time, number, textarea,
+          select, radio, checks, three (3 inputs), file, computed, note
+   Cada campo: {k:'clave', l:'Etiqueta', t:'tipo', req:true,
+                opts:[...], hint:'', sub:'Subtítulo', col2:true,
+                showIf:{k:'otraClave', val:'valor'} }
+   ========================================================= */
+
+const USUARIOS = ['Mateo','Joaquín','Carlos (medidor)','Operario 1','Operario 2','Colocador 1'];
+const COLORES  = ['Blanco','Gris Arcilla','Gris Macadan','Gris Perla','Roble Natural','Nogal','Negro'];
+const ESPACIOS = ['Cocina','Vestidor','Dormitorio','Living','Baño','Otro'];
+
+const ETAPAS = [
+  {
+    n:1, titulo:'Alta del proyecto', sub:'primer contacto', estado:'en_ventas',
+    campos:[
+      {k:'nombre', l:'Nombre', t:'text', req:true},
+      {k:'apellidos', l:'Apellidos', t:'text', req:true},
+      {k:'telefono', l:'Teléfono', t:'tel', req:true, hint:'Sugerido +54 11 XXXX-XXXX'},
+      {k:'email', l:'Email', t:'email'},
+      {k:'direccion', l:'Dirección de colocación', t:'text', req:true, col2:true, hint:'Calle, número, piso/depto, localidad'},
+      {k:'clasificacion', l:'Clasificación del cliente', t:'select', opts:['potencial','indeciso','frío','cerrado']},
+      {k:'como_conocio', l:'Cómo nos conoció', t:'select', opts:['Instagram','Recomendación','Web','Showroom','Pasaba por el local','Otro']},
+      {k:'espacios', l:'Espacios a hacer', t:'checks', req:true, col2:true, opts:ESPACIOS},
+      {k:'que_dijo', l:'Qué te dijo', t:'textarea', col2:true, hint:'Lo que pidió, en caliente, sin filtrar'},
+      {k:'fecha_tentativa', l:'Fecha tentativa que la quiere', t:'date'},
+      {k:'vendedor', l:'Vendedor responsable', t:'text', req:true},
+      {k:'notas_cliente', l:'Notas del cliente / proyecto', t:'textarea', col2:true, hint:'Preferencias, contexto del hogar, urgencia, presupuesto, quién decide, alertas...'},
+    ]
+  },
+  {
+    n:2, titulo:'Visita / Relevamiento técnico', sub:'medición en el lugar', estado:'en_ventas',
+    campos:[
+      {k:'fecha_visita', l:'Fecha de visita', t:'date', req:true},
+      {k:'quien_midio', l:'Quién fue a medir', t:'select', req:true, opts:USUARIOS},
+      {k:'medidas_espacio', l:'Medidas del espacio', t:'textarea', req:true, col2:true, hint:'Ancho × alto × profundidad, paredes relevantes'},
+      {k:'ascensor', l:'¿Tiene ascensor?', t:'radio', req:true, opts:['Sí','No']},
+      {k:'medidas_acceso', l:'Medidas de acceso', t:'text', req:true, hint:'Puerta principal, pasillos, escaleras'},
+      {k:'mochetas', l:'¿Hay mochetas?', t:'radio', req:true, opts:['Sí','No']},
+      {k:'falsas_escuadras', l:'¿Falsas escuadras?', t:'radio', req:true, opts:['Sí','No']},
+      {k:'tipo_piso', l:'Tipo de piso', t:'select', opts:['Cerámico','Madera','Flotante','Cemento alisado','Otro']},
+      {k:'estado_lugar', l:'Estado general del lugar', t:'select', req:true, opts:['Listo para colocar','En obra','Por terminar']},
+      {k:'instalaciones', l:'Instalaciones existentes', t:'checks', req:true, col2:true, opts:['Gas','220V','380V','Agua','Desagüe','Campana extracción']},
+      {k:'fotos_lugar', l:'Fotos del lugar', t:'file', req:true, col2:true, hint:'Mínimo 3 (frente, lateral, accesos)'},
+      {k:'plano_lugar', l:'Plano del lugar (si existe)', t:'file', col2:true, hint:'PDF o imagen del plano'},
+      {k:'notas_relevamiento', l:'Notas del relevamiento', t:'textarea', col2:true, hint:'Humedad, columnas, ausencias del cliente, etc.'},
+    ]
+  },
+  {
+    n:3, titulo:'Diseño', sub:'general + por mueble', estado:'diseño',
+    campos:[
+      {sub:'3A · Diseño general'},
+      {k:'desc_diseno', l:'Descripción del diseño', t:'textarea', req:true, col2:true, hint:'Estilo, colores, idea general'},
+      {k:'link_render', l:'Link al render', t:'url', req:true},
+      {k:'link_planos', l:'Link a planos técnicos', t:'url'},
+      {k:'boceto_aprobado', l:'Boceto aprobado por el cliente', t:'file', req:true, hint:'El documento que el cliente firma'},
+      {k:'fecha_aprob_diseno', l:'Fecha de aprobación del diseño', t:'date', req:true},
+      {muebles:true},
+    ]
+  },
+  {
+    n:4, titulo:'Cierre comercial', sub:'plata · fechas · documentación', estado:'diseño',
+    campos:[
+      {sub:'4A · Plata'},
+      {k:'moneda', l:'Moneda', t:'radio', req:true, opts:['ARS','USD']},
+      {k:'monto_total', l:'Monto total', t:'number', req:true, hint:'Precio final acordado'},
+      {k:'descuento', l:'Descuento aplicado', t:'number', hint:'Monto o %'},
+      {k:'facturacion', l:'Forma de facturación', t:'select', req:true, opts:['Factura A','Factura B','Factura C','Sin factura']},
+      {k:'sena', l:'Seña / anticipo recibido', t:'number', req:true},
+      {k:'fecha_sena', l:'Fecha de la seña', t:'date', req:true},
+      {k:'pago_sena', l:'Forma de pago de la seña', t:'select', req:true, opts:['Efectivo','Transferencia','MercadoPago','Cheque','Tarjeta']},
+      {k:'saldo', l:'Saldo restante', t:'computed', hint:'Monto total − seña (automático)'},
+      {k:'pago_saldo', l:'Forma de pago del saldo', t:'select', req:true, col2:true, opts:['Contraentrega','Antes del armado','En cuotas','Mitad y mitad','Otro']},
+      {k:'detalle_cuotas', l:'Detalle de cuotas', t:'textarea', col2:true, showIf:{k:'pago_saldo', val:'En cuotas'}, hint:'Cantidad de cuotas, montos, fechas'},
+      {k:'detalle_otro_pago', l:'Detalle (Otro)', t:'text', col2:true, showIf:{k:'pago_saldo', val:'Otro'}},
+      {sub:'4B · Fechas comprometidas'},
+      {k:'fecha_cierre', l:'Fecha de cierre de venta', t:'date', req:true, hint:'Dispara límite de cambios gratis (+14 días)'},
+      {k:'limite_cambios', l:'Límite cambios gratis', t:'computed', hint:'Cierre + 14 días (automático)'},
+      {k:'fecha_entrega', l:'Fecha de entrega prometida', t:'date', req:true, hint:'La fecha clave para detectar atrasos'},
+      {k:'fecha_coloc_tent', l:'Fecha de colocación tentativa', t:'date'},
+      {sub:'4C · Documentación y cláusulas'},
+      {k:'contrato', l:'Contrato / presupuesto firmado', t:'file', req:true},
+      {k:'comprob_sena', l:'Comprobante de seña', t:'file', req:true},
+      {k:'clausulas', l:'Cláusulas / condiciones especiales', t:'textarea', col2:true, hint:'Ej: cliente provee mesada, garantía 1 año herrajes'},
+      {k:'notas_cierre', l:'Notas del cierre', t:'textarea', col2:true},
+    ]
+  },
+  {
+    n:5, titulo:'Producción y colocación', sub:'5A · 5B · 5C', estado:'producción',
+    campos:[
+      {sub:'5A · Producción (resumen — el detalle fino va por cada mueble)'},
+      {k:'operario', l:'Operario asignado', t:'select', opts:USUARIOS},
+      {k:'estado_prod', l:'Estado general de producción', t:'select', opts:['pendiente','en producción','producido','en colocación','colocado','trabado']},
+      {k:'notas_prod', l:'Notas de producción', t:'textarea', col2:true, hint:'Cambios de color por stock, refuerzos, ajustes'},
+      {k:'fotos_terminado', l:'Fotos del mueble terminado', t:'file', col2:true},
+      {k:'trabado_motivo', l:'Si está trabado: motivo', t:'textarea', col2:true, showIf:{k:'estado_prod', val:'trabado'}},
+      {k:'trabado_necesita', l:'Si está trabado: qué se necesita', t:'text', showIf:{k:'estado_prod', val:'trabado'}},
+      {k:'trabado_resp', l:'Responsable de destrabar', t:'select', opts:USUARIOS, showIf:{k:'estado_prod', val:'trabado'}},
+      {sub:'5B · Colocación'},
+      {k:'fecha_coloc_agenda', l:'Fecha de colocación agendada', t:'date', req:true},
+      {k:'horario_coloc', l:'Horario', t:'time'},
+      {k:'colocador', l:'Colocador responsable', t:'select', req:true, opts:USUARIOS},
+      {k:'ayudantes', l:'Ayudantes', t:'checks', opts:USUARIOS, col2:true},
+      {k:'transporte', l:'Vehículo / transporte', t:'select', req:true, opts:['Camioneta propia','Flete contratado','Cliente retira']},
+      {k:'entrega_tipo', l:'¿Entrega completa o por partes?', t:'radio', req:true, opts:['Completa','Por partes']},
+      {k:'notas_colocador', l:'Notas para el colocador', t:'textarea', col2:true, hint:'Mochetas, ascensor chico, mascotas, accesos'},
+      {sub:'5C · Post-colocación (cierre)'},
+      {k:'fecha_coloc_real', l:'Fecha real de colocación', t:'date', req:true},
+      {k:'conforme', l:'¿Cliente conforme?', t:'radio', req:true, opts:['Sí','No','Parcial']},
+      {k:'obs_cliente', l:'Observaciones del cliente', t:'textarea', col2:true, showIf:{k:'conforme', val:['No','Parcial']}},
+      {k:'pendientes', l:'Pendientes post-colocación', t:'textarea', col2:true, hint:'Ej: tapa de cajón faltante, regular bisagras'},
+      {k:'foto_colocado', l:'Foto del mueble colocado', t:'file', req:true},
+      {k:'conformidad_firmada', l:'Conformidad firmada por cliente', t:'file', req:true},
+      {k:'saldo_cobrado', l:'Saldo final cobrado', t:'radio', req:true, opts:['Sí','No']},
+      {k:'fecha_cobro', l:'Fecha cobro saldo', t:'date', showIf:{k:'saldo_cobrado', val:'Sí'}},
+      {k:'forma_cobro', l:'Forma de cobro del saldo', t:'select', opts:['Efectivo','Transferencia','Cheque','MercadoPago','Tarjeta'], showIf:{k:'saldo_cobrado', val:'Sí'}},
+    ]
+  },
+];
+
+// Campos de un mueble (Etapa 3B) — repetible
+const MUEBLE_CAMPOS = [
+  {k:'espacio', l:'Espacio', t:'select', req:true, opts:ESPACIOS},
+  {k:'tipo', l:'Tipo de mueble', t:'select', req:true, opts:['Alacena','Bajo mesada','Placard','Vestidor','Mueble de baño','Mesada','Isla','Otro']},
+  {k:'modulos', l:'Cantidad de módulos', t:'number', req:true},
+  {k:'nombre_custom', l:'Nombre custom', t:'text', hint:'Ej: Bajo mesada izquierdo'},
+  {k:'medidas', l:'Medidas (alto / largo / profundo cm)', t:'three', req:true, col2:true},
+  {k:'color', l:'Color', t:'select', req:true, opts:COLORES},
+  {k:'nivel', l:'Nivel', t:'select', req:true, opts:['2','3','4','5']},
+  {k:'lleva_puerta', l:'¿Lleva puerta(s)?', t:'radio', req:true, opts:['Sí','No']},
+  {k:'cant_puertas', l:'Cantidad de puertas / hojas', t:'number', showIf:{k:'lleva_puerta', val:'Sí'}},
+  {k:'mat_puerta', l:'Material de la puerta', t:'select', opts:['Melamina','Vidrio','Laqueada','Madera maciza'], showIf:{k:'lleva_puerta', val:'Sí'}},
+  {k:'apertura', l:'Tipo de apertura', t:'select', opts:['Batiente','Corrediza','Rebatible','Plegable','Push-to-open'], showIf:{k:'lleva_puerta', val:'Sí'}},
+  {k:'cajones', l:'Cantidad de cajones', t:'number'},
+  {k:'zocalo', l:'Tipo de zócalo', t:'select', req:true, opts:['Plástico','Aluminio','Melamina','Retranqueado','Sin zócalo']},
+  {k:'filo', l:'Tipo de filo (tapacanto)', t:'select', req:true, opts:['0,45 mm','2 mm']},
+  {k:'laqueado', l:'¿Laqueado?', t:'radio', req:true, opts:['Sí','No']},
+  {k:'detalle_laqueado', l:'Detalle laqueado', t:'text', col2:true, showIf:{k:'laqueado', val:'Sí'}, hint:'Color, mate/brillante, partes laqueadas'},
+  {k:'led', l:'¿Lleva LED?', t:'radio', req:true, opts:['Sí','No']},
+  {k:'tipo_led', l:'Tipo de LED', t:'select', opts:['Tira','Spot','Barra rígida','Panel','Con sensor de movimiento'], showIf:{k:'led', val:'Sí'}},
+  {k:'desc_led', l:'Cómo va el LED', t:'textarea', col2:true, showIf:{k:'led', val:'Sí'}, hint:'Dónde va, color cálido/frío, si es regulable'},
+  {k:'herraje', l:'Tipo de herraje', t:'select', req:true, opts:['Cierre suave','Cierre común','Push','Bisagras ocultas']},
+  {k:'caracteristicas', l:'Características adicionales', t:'textarea', col2:true, hint:'Divisiones internas, vidrios, especiales'},
+  {k:'boceto_mueble', l:'Boceto del mueble', t:'file'},
+  {k:'croquis', l:'Croquis técnico', t:'file', hint:'Con medidas para producción'},
+];
+
+const ESTADO_ORDEN = ['en_ventas','diseño','producción','colocación','finalizado'];
+const ESTADO_LABEL = {en_ventas:'En ventas','diseño':'Diseño','producción':'Producción','colocación':'Colocación',finalizado:'Finalizado',cancelado:'Cancelado'};
+const BADGE_CLASS = {en_ventas:'b-ventas','diseño':'b-diseno','producción':'b-prod','colocación':'b-coloc',finalizado:'b-fin',cancelado:'b-fin'};
+
+// Datos de muestra
+const PROYECTOS = [
+  {pid:'PRY-001', cliente:'Alfredo Gómez', estado:'producción', telefono:'11 4567-8901', direccion:'Av. Rivadavia 2200, CABA', espacios:'Cocina, Living', vendedor:'Mateo'},
+  {pid:'PRY-002', cliente:'Lucía Fernández', estado:'en_ventas', telefono:'11 3322-1100', direccion:'Belgrano 450, Vicente López', espacios:'Vestidor', vendedor:'Joaquín'},
+  {pid:'PRY-003', cliente:'Martín Suárez', estado:'colocación', telefono:'11 9988-7766', direccion:'San Martín 120, Olivos', espacios:'Cocina, Baño', vendedor:'Mateo'},
+  {pid:'PRY-004', cliente:'Carla Ponce', estado:'diseño', telefono:'11 2211-3344', direccion:'Maipú 800, CABA', espacios:'Dormitorio', vendedor:'Joaquín'},
+  {pid:'PRY-005', cliente:'Roberto Díaz', estado:'finalizado', telefono:'11 5544-6677', direccion:'Mitre 333, San Isidro', espacios:'Cocina', vendedor:'Mateo'},
+];
+
+let filtroEstado = '';
+const $ = s => document.querySelector(s);
+
+/* ---------- LISTA ---------- */
+function renderLista(){
+  const q = ($('#buscar').value||'').toLowerCase();
+  const cont = $('#lista'); cont.innerHTML='';
+  const items = PROYECTOS.filter(p=>{
+    if(filtroEstado && p.estado!==filtroEstado) return false;
+    if(!q) return true;
+    return [p.cliente,p.direccion,p.pid,p.vendedor,p.espacios].join(' ').toLowerCase().includes(q);
+  });
+  if(!items.length){ cont.innerHTML='<div class="card" style="text-align:center;color:var(--text-muted)">Sin resultados</div>'; return; }
+  items.forEach(p=>{
+    const d=document.createElement('div');
+    d.className='card proj-card';
+    d.onclick=()=>abrirFicha(p);
+    d.innerHTML=`<div class="row1">
+        <span class="badge ${BADGE_CLASS[p.estado]}">${ESTADO_LABEL[p.estado]}</span>
+        <span class="cliente">👤 ${p.cliente}</span>
+        <span class="pid">${p.pid}</span>
+      </div>
+      <div class="meta">📞 ${p.telefono} · 📍 ${p.direccion}</div>
+      <div class="meta">🏠 ${p.espacios} · Vendedor: ${p.vendedor}</div>`;
+    cont.appendChild(d);
+  });
+}
+$('#buscar').addEventListener('input', renderLista);
+$('#estado-chips').addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  filtroEstado=b.dataset.estado;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c===b));
+  renderLista();
+});
+
+/* ---------- FICHA ---------- */
+function abrirFicha(p){
+  $('#view-lista').classList.add('hidden');
+  $('#view-ficha').classList.remove('hidden');
+  $('#ficha-cliente').textContent = p ? p.cliente : 'Nuevo proyecto';
+  $('#ficha-pid').textContent = p ? p.pid : 'NUEVO';
+  $('#ficha-estado').value = p ? p.estado : 'en_ventas';
+  $('#acc-container').innerHTML = ETAPAS.map(buildEtapa).join('');
+  // primera etapa abierta
+  const first=document.querySelector('.acc'); if(first) first.classList.add('open');
+  pintarSteps();
+  wireConditionals();
+  window.scrollTo(0,0);
+}
+function volverLista(){
+  $('#view-ficha').classList.add('hidden');
+  $('#view-lista').classList.remove('hidden');
+}
+
+function buildEtapa(et){
+  let inner='<div class="grid">';
+  et.campos.forEach(c=>{
+    if(c.muebles){ inner+='</div>'+buildMuebles()+'<div class="grid">'; return; }
+    if(c.sub && !c.k){ inner+=`<div class="subhead">${c.sub}</div>`; return; }
+    inner+=field(c);
+  });
+  inner+='</div>';
+  return `<div class="acc" data-etapa="${et.n}">
+    <div class="acc-head" onclick="this.parentElement.classList.toggle('open')">
+      <span class="acc-num">${et.n}</span>
+      <h3>Etapa ${et.n} — ${et.titulo}</h3><span class="acc-sub">${et.sub}</span>
+      <span class="caret">▼</span>
+    </div>
+    <div class="acc-body">${inner}</div>
+  </div>`;
+}
+
+function buildMuebles(){
+  return `<div class="subhead" style="margin-top:12px">3B · Muebles del proyecto</div>
+    <div id="muebles-list"></div>
+    <button type="button" class="btn btn-outline btn-sm" onclick="addMueble()">+ Agregar mueble</button>`;
+}
+let muebleSeq=0;
+function addMueble(){
+  muebleSeq++;
+  const list=document.getElementById('muebles-list'); if(!list) return;
+  const wrap=document.createElement('div'); wrap.className='mueble';
+  const body=MUEBLE_CAMPOS.map(c=>field(c,'m'+muebleSeq+'_')).join('');
+  wrap.innerHTML=`<div class="mueble-head"><span class="mt">🪵 Mueble #${muebleSeq}</span>
+      <button class="del" onclick="this.closest('.mueble').remove()">✕ Quitar</button></div>
+    <div class="mueble-body"><div class="grid">${body}</div></div>`;
+  list.appendChild(wrap);
+  wireConditionals();
+}
+
+function field(c, prefix=''){
+  const id=prefix+c.k;
+  const cls='fg'+(c.col2?' col-2':'');
+  const sh=c.showIf?` data-showif='${JSON.stringify({k:prefix+c.showIf.k,val:c.showIf.val})}'`:'';
+  const lbl=c.l?`<label>${c.l}${c.req?' <span class="req">*</span>':''}</label>`:'';
+  const hint=c.hint?`<span class="hint">${c.hint}</span>`:'';
+  let ctrl='';
+  switch(c.t){
+    case 'textarea': ctrl=`<textarea class="input" id="${id}"></textarea>`; break;
+    case 'select':
+      ctrl=`<select class="input" id="${id}"><option value="">—</option>${(c.opts||[]).map(o=>`<option>${o}</option>`).join('')}</select>`; break;
+    case 'radio':
+      ctrl=`<div class="radio-row" id="${id}">${(c.opts||[]).map(o=>`<label class="opt"><input type="radio" name="${id}" value="${o}">${o}</label>`).join('')}</div>`; break;
+    case 'checks':
+      ctrl=`<div class="check-grid" id="${id}">${(c.opts||[]).map(o=>`<label class="opt"><input type="checkbox" value="${o}">${o}</label>`).join('')}</div>`; break;
+    case 'three':
+      ctrl=`<div class="three"><input class="input" placeholder="Alto"><input class="input" placeholder="Largo"><input class="input" placeholder="Profundo"></div>`; break;
+    case 'file':
+      ctrl=`<label class="file-drop">📎 Subir archivo(s)<input type="file" multiple style="display:none"></label>`; break;
+    case 'computed':
+      ctrl=`<input class="input computed" id="${id}" readonly value="—">`; break;
+    default:
+      ctrl=`<input class="input" type="${c.t}" id="${id}">`;
+  }
+  return `<div class="${cls}"${sh}>${lbl}${ctrl}${hint}</div>`;
+}
+
+/* ---------- Condicionales + cálculos ---------- */
+function wireConditionals(){
+  document.querySelectorAll('[data-showif]').forEach(applyShowIf);
+  // listeners
+  document.querySelectorAll('#view-ficha input, #view-ficha select').forEach(el=>{
+    el.oninput=onFichaChange; el.onchange=onFichaChange;
+  });
+  recalcular();
+}
+function applyShowIf(el){
+  const cfg=JSON.parse(el.getAttribute('data-showif'));
+  const vals=Array.isArray(cfg.val)?cfg.val:[cfg.val];
+  let cur='';
+  const radios=document.querySelectorAll(`[name="${cfg.k}"]`);
+  if(radios.length){ const c=[...radios].find(r=>r.checked); cur=c?c.value:''; }
+  else { const f=document.getElementById(cfg.k); cur=f?f.value:''; }
+  el.style.display = vals.includes(cur) ? '' : 'none';
+}
+function onFichaChange(){
+  document.querySelectorAll('[data-showif]').forEach(applyShowIf);
+  recalcular();
+}
+function recalcular(){
+  // saldo = monto_total - sena
+  const mt=parseFloat(document.getElementById('monto_total')?.value||0);
+  const se=parseFloat(document.getElementById('sena')?.value||0);
+  const saldo=document.getElementById('saldo');
+  if(saldo) saldo.value = (mt||se) ? '$ '+(mt-se).toLocaleString('es-AR') : '—';
+  // limite cambios = fecha_cierre + 14
+  const fc=document.getElementById('fecha_cierre')?.value;
+  const lc=document.getElementById('limite_cambios');
+  if(lc){ if(fc){ const d=new Date(fc); d.setDate(d.getDate()+14); lc.value=d.toLocaleDateString('es-AR'); } else lc.value='—'; }
+}
+
+/* ---------- Steps ---------- */
+function pintarSteps(){
+  const est=$('#ficha-estado').value;
+  const idx=ESTADO_ORDEN.indexOf(est);
+  $('#steps').innerHTML=ESTADO_ORDEN.map((e,i)=>{
+    let c='step'; if(i<idx)c+=' done'; if(i===idx)c+=' current';
+    return `<div class="${c}">${i<idx?'✓ ':''}${ESTADO_LABEL[e]}</div>`;
+  }).join('');
+}
+
+/* ---------- Guardar (simulado) ---------- */
+function guardar(){
+  const t=$('#toast'); t.textContent='✓ Ficha guardada (simulado — prototipo)'; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+renderLista();
+</script>
+</body>
+</html>

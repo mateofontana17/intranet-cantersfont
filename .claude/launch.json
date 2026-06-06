@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototipo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "prototipo", "-l", "4599"],
+      "port": 4599
+    },
+    {
+      "name": "web-form",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "web-form", "-l", "4600"],
+      "port": 4600
+    }
+  ]
+}

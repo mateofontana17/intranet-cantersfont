@@ -1,0 +1,2 @@
+"pedido_id","cliente_id","cliente_nombre","fecha_entrega","sena","total","saldo","estado","notas","cantidad_muebles","fecha_alta","cabecera","items","","",""
+"PED-260526-202411","CLI-002","Alfredo Gomez","2026-06-15","50000","200000","150000","Pendiente","test retest","1","2026-05-26","","","","",""

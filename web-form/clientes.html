@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fontana - Clientes & Pedidos</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- PIN overlay -->
+  <div id="pin-overlay" class="overlay">
+    <div class="overlay-card">
+      <h2>Acceso al Sistema</h2>
+      <p>Ingrese su PIN para continuar</p>
+      <input type="password" id="pin-input" class="input" placeholder="PIN" maxlength="10" inputmode="numeric" autocomplete="off" />
+      <button id="pin-submit" class="btn btn-primary btn-block">Ingresar</button>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div id="app" class="hidden">
+    <header>
+      <div class="header-content">
+        <h1>Fontana</h1>
+        <p class="subtitle">Clientes & Pedidos</p>
+        <nav class="header-nav">
+          <a href="index.html" class="btn btn-sm btn-outline">&#128200; Stock</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Tab navigation -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="clientes">Clientes</button>
+        <button class="tab-btn" data-tab="pedidos">Proyectos</button>
+      </div>
+
+      <!-- ========== CLIENTES TAB ========== -->
+      <div id="tab-clientes" class="tab-content">
+
+        <!-- List view -->
+        <div id="cli-list-view">
+          <div class="cli-top-bar">
+            <input type="text" id="cli-buscar" class="input input-sm" placeholder="Buscar por nombre o telefono..." />
+            <button class="btn btn-sm btn-primary" id="cli-nuevo-btn">+ Nuevo</button>
+          </div>
+          <div id="cli-loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Cargando clientes...</p>
+          </div>
+          <div id="cli-lista"></div>
+        </div>
+
+        <!-- Edit/Create view -->
+        <div id="cli-edit-view" class="hidden">
+          <div class="section-header">
+            <button class="btn-back" id="cli-back-lista">&larr; Volver</button>
+            <h2 id="cli-edit-title">Nuevo Cliente</h2>
+          </div>
+          <form id="form-cliente" class="card" novalidate>
+            <input type="hidden" id="cli-id" />
+            <div class="form-group">
+              <label for="cli-nombre">Nombre *</label>
+              <input type="text" id="cli-nombre" class="input" placeholder="Nombre completo" required />
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="cli-telefono">Telefono *</label>
+              <input type="tel" id="cli-telefono" class="input" placeholder="Ej: 11-1234-5678" required />
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="cli-email">Email</label>
+              <input type="email" id="cli-email" class="input" placeholder="ejemplo@email.com" />
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="cli-direccion">Direccion</label>
+              <input type="text" id="cli-direccion" class="input" placeholder="Calle y numero" />
+            </div>
+            <div class="form-group">
+              <label for="cli-localidad">Localidad</label>
+              <input type="text" id="cli-localidad" class="input" placeholder="Ciudad / Barrio" />
+            </div>
+            <div class="form-group">
+              <label for="cli-notas">Notas</label>
+              <textarea id="cli-notas" class="input" rows="3" placeholder="Notas adicionales..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="cli-submit-btn">Guardar Cliente</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ========== PROYECTOS TAB (Etapa 1 - alta) ========== -->
+      <div id="tab-pedidos" class="tab-content hidden">
+
+        <!-- List view -->
+        <div id="ped-list-view">
+          <!-- Status filter -->
+          <div class="ped-status-filter">
+            <button class="status-btn active" data-estado="">Todos</button>
+            <button class="status-btn" data-estado="en_ventas">En ventas</button>
+            <button class="status-btn" data-estado="diseño">Diseño</button>
+            <button class="status-btn" data-estado="producción">Producción</button>
+            <button class="status-btn" data-estado="colocación">Colocación</button>
+            <button class="status-btn" data-estado="finalizado">Finalizado</button>
+          </div>
+          <div class="ped-top-bar">
+            <button class="btn btn-sm btn-primary" id="ped-nuevo-btn">+ Nuevo Proyecto</button>
+            <button class="btn btn-sm btn-outline" id="ped-refresh-btn">Recargar</button>
+          </div>
+          <div id="ped-loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Cargando proyectos...</p>
+          </div>
+          <div id="ped-lista"></div>
+        </div>
+
+        <!-- Create view -->
+        <div id="ped-edit-view" class="hidden">
+          <div class="section-header">
+            <button class="btn-back" id="ped-back-lista">&larr; Volver</button>
+            <h2>Nuevo Proyecto</h2>
+          </div>
+          <form id="form-pedido" class="card" novalidate>
+            <div class="form-group">
+              <label for="pry-cliente">Cliente *</label>
+              <select id="pry-cliente" class="input" required>
+                <option value="">Seleccionar cliente registrado...</option>
+              </select>
+              <span class="field-error"></span>
+              <span class="input-hint">Solo se pueden asignar proyectos a clientes ya registrados (pestaña Clientes).</span>
+            </div>
+            <div class="form-group">
+              <label for="pry-direccion">Dirección de colocación *</label>
+              <input type="text" id="pry-direccion" class="input" placeholder="Calle, número, piso/depto, localidad" required />
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="pry-clasificacion">Clasificación del cliente</label>
+              <select id="pry-clasificacion" class="input">
+                <option value="">Sin clasificar</option>
+                <option value="potencial">Potencial</option>
+                <option value="indeciso">Indeciso</option>
+                <option value="frío">Frío</option>
+                <option value="cerrado">Cerrado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pry-como">Cómo nos conoció</label>
+              <select id="pry-como" class="input">
+                <option value="">—</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Recomendación">Recomendación</option>
+                <option value="Web">Web</option>
+                <option value="Showroom">Showroom</option>
+                <option value="Pasaba por el local">Pasaba por el local</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Espacios a hacer *</label>
+              <div class="pry-espacios-group">
+                <label class="pry-check"><input type="checkbox" class="pry-espacio" value="Cocina" /> Cocina</label>
+                <label class="pry-check"><input type="checkbox" class="pry-espacio" value="Vestidor" /> Vestidor</label>
+                <label class="pry-check"><input type="checkbox" class="pry-espacio" value="Dormitorio" /> Dormitorio</label>
+                <label class="pry-check"><input type="checkbox" class="pry-espacio" value="Living" /> Living</label>
+                <label class="pry-check"><input type="checkbox" class="pry-espacio" value="Baño" /> Baño</label>
+                <label class="pry-check"><input type="checkbox" class="pry-espacio" value="Otro" /> Otro</label>
+              </div>
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="pry-quetedijo">Qué te dijo</label>
+              <textarea id="pry-quetedijo" class="input" rows="2" placeholder="Lo que pidió, en caliente, sin filtrar"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="pry-fecha-tentativa">Fecha tentativa que la quiere</label>
+              <input type="date" id="pry-fecha-tentativa" class="input" />
+            </div>
+            <div class="form-group">
+              <label for="pry-notas">Notas del cliente / proyecto</label>
+              <textarea id="pry-notas" class="input" rows="3" placeholder="Preferencias, contexto del hogar, urgencia, presupuesto, quién decide, alertas..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="pry-vendedor">Vendedor responsable *</label>
+              <input type="text" id="pry-vendedor" class="input" placeholder="Tu nombre" required />
+              <span class="field-error"></span>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="ped-submit-btn">Crear Proyecto</button>
+          </form>
+        </div>
+
+        <!-- Ficha del proyecto (detalle editable, Etapas 1-5) -->
+        <div id="ped-detail-view" class="hidden">
+          <div class="section-header">
+            <button class="btn-back" id="ped-detail-back">&larr; Volver</button>
+            <h2 id="ped-detail-title">Ficha del Proyecto</h2>
+          </div>
+          <div id="ped-detail-meta" class="ficha-meta"></div>
+          <div id="ped-etapas" class="ficha-etapas"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="clientes.js"></script>
+</body>
+</html>

@@ -1,0 +1,3687 @@
+{
+  "updatedAt": "2026-04-25T20:08:21.138Z",
+  "createdAt": "2026-04-04T23:41:20.249Z",
+  "id": "7ntDbXur9JBetv23",
+  "name": "Fontana — Formulario web webhook",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fontana-stock-form",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "2acce5cc-6844-4f5f-8516-5f534f5db43a",
+      "name": "Recibir formulario",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        1200
+      ],
+      "webhookId": "fontana-stock-form"
+    },
+    {
+      "parameters": {
+        "content": "## ENTRADA\nWebhook POST con { action, data, pin }.",
+        "height": 472,
+        "width": 300,
+        "color": 4
+      },
+      "id": "cd738e71-0ee6-41f4-bcf0-fc227f2cf1e8",
+      "name": "Nota: Entrada web",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Ejecucion Compra\nBusca SKU, calcula stock nuevo, actualiza sheet.",
+        "height": 380,
+        "width": 1392,
+        "color": 4
+      },
+      "id": "93f48edb-8add-418b-8273-069ec2c1ae32",
+      "name": "Nota: Compra web",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => ({\n  json: {\n    action: item.json.body.action,\n    ...item.json.body.data,\n    pin: item.json.body.pin\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        416
+      ],
+      "id": "12bddb8a-9934-4a48-bc15-57b05d364f99",
+      "name": "Normalizacion Webhook Compras"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Stock Existente? - Verifica si el producto de la compra ya existe en el catálogo\n\nconst catalogo = $('Filter1').all();\nconst compras  = $('Normalizacion Webhook Compras').all();\n\nconst norm = (v) => String(v ?? '').trim().toUpperCase();\n\n// Set de códigos existentes en el catálogo\nconst codigosCatalogo = new Set(\n  catalogo\n    .map(i => norm(i.json['Código'] ?? i.json.codigo))\n    .filter(Boolean)\n);\n\n// Para cada item de la compra, marcar si existe\nreturn compras.map(item => {\n  const codigo = norm(item.json.codigo);\n  const existe = codigosCatalogo.has(codigo);\n\n  return {\n    json: {\n      ...item.json,\n      codigo_normalizado: codigo,\n      existe,\n      estado: existe ? 'EXISTE' : 'NO_EXISTE',\n    },\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        416
+      ],
+      "id": "4c6ea51f-66a2-49ef-ae09-424ec9c08329",
+      "name": "Stock Existente?"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1758986104,
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1758986104"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A2:M"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        416
+      ],
+      "id": "dffb488c-0843-4c44-8d13-8f7ecb3c9514",
+      "name": "Ficha stock",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1758986104,
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1758986104"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Código": "={{ $json.codigo }}",
+            "PROVEEDOR": "={{ $json.proveedor }}",
+            "Stock Actual": "={{ $json.nuevo_stock }}",
+            "VALOR STOCK": "={{ $json.nuevo_valor }}"
+          },
+          "matchingColumns": [
+            "Código"
+          ],
+          "schema": [
+            {
+              "id": "Hoja Origen",
+              "displayName": "Hoja Origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sección",
+              "displayName": "Sección",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Producto",
+              "displayName": "Producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Color / Variante",
+              "displayName": "Color / Variante",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Marca",
+              "displayName": "Marca",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Medida",
+              "displayName": "Medida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Código",
+              "displayName": "Código",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Precio Unit.",
+              "displayName": "Precio Unit.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Stock Actual",
+              "displayName": "Stock Actual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Stock Mín.",
+              "displayName": "Stock Mín.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Precio Total",
+              "displayName": "Precio Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Reponer",
+              "displayName": "Reponer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "STOCK",
+              "displayName": "STOCK",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "VALOR STOCK",
+              "displayName": "VALOR STOCK",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PROVEEDOR",
+              "displayName": "PROVEEDOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "locationDefine": {
+            "values": {
+              "headerRow": 2,
+              "firstDataRow": 3
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        352
+      ],
+      "id": "abb73854-ef82-4e62-b495-5ca639b40d74",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, mensaje: 'Compra registrada', sku: $json.SKU, stock: $json.STOCK }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        352
+      ],
+      "id": "37d196c8-8c12-47d8-9c24-50e573873b7f",
+      "name": "Responder compra OK"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1284713931,
+          "mode": "list",
+          "cachedResultName": "Estandares Materiales",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1284713931"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        768
+      ],
+      "id": "9d854197-3749-4ea5-9b8c-142e183029b2",
+      "name": "Leer BOM venta",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// RESOLVER BOM DEL PEDIDO — v5 (con invariantes de input)\n// ───────────────────────────────────────────────────────────────────────────\n// Cambios v5 respecto a v4:\n//   - Nuevo bloque de INVARIANTES al inicio que valida la integridad del\n//     input (pedido + BOM + stock) antes de resolver.\n//   - Si alguna violación es detectada → el resolver emite el output con\n//     `violaciones: [...]` y el mapeo posterior lo bloquea.\n//   - 10 invariantes identificados con IDs INV-R01..INV-R10.\n//\n// Filosofía:\n//   Un invariante es una condición que SIEMPRE debe ser verdadera. Si se\n//   viola, es un bug del sistema (planilla corrupta, normalizador roto,\n//   upstream malo). No es responsabilidad del usuario final; es un error\n//   de plataforma que debe alertar para ser investigado.\n//\n// Input (igual que v4):\n//   - $('normalizar pedido').all()  → 1 header + N items\n//   - $input.all()                   → BOM + Stock concatenado (Merge append)\n// ═══════════════════════════════════════════════════════════════════════════\n\n// ── Helpers ────────────────────────────────────────────────────────────────\n\nconst normText = (s) =>\n  String(s ?? '')\n    .trim()\n    .toLowerCase()\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '');\n\nconst pick = (row, ...keys) => {\n  for (const k of keys) {\n    if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];\n    const match = Object.keys(row).find((rk) => normText(rk) === normText(k));\n    if (match && row[match] !== undefined && row[match] !== null && row[match] !== '') {\n      return row[match];\n    }\n  }\n  return null;\n};\n\nconst parseMoney = (v) => {\n  if (v === null || v === undefined || v === '') return 0;\n  const cleaned = String(v).replace(/[^\\d.,\\-]/g, '').replace(/\\./g, '').replace(',', '.');\n  const n = Number(cleaned);\n  return Number.isFinite(n) ? n : 0;\n};\n\nconst parseNumber = (v) => {\n  if (v === null || v === undefined || v === '') return 0;\n  const n = Number(String(v).trim().replace(',', '.'));\n  return Number.isFinite(n) ? n : 0;\n};\n\n// ── Productos considerados \"placa estructural\" ────────────────────────────\nconst PRODUCTOS_PLACA = new Set([\n  'Placa MDF 18mm',\n  'Placa MDF Crudo 18mm',\n  'Placa Rauvisio',\n]);\n\n// ── Parser de material del BOM ────────────────────────────────────────────\nconst parsearMaterialBom = (materialStr) => {\n  const str = String(materialStr || '').trim();\n  if (!str) return null;\n  const partes = str.split(/\\s+-\\s+/);\n  if (partes.length < 2) {\n    return { producto: str, categoria: null, placeholder: false, filtroExtra: null, raw: str };\n  }\n  const producto = partes[0].trim();\n  const resto = partes.slice(1).join(' - ').trim();\n  if (resto.startsWith('*')) {\n    const matchNivel = resto.match(/\\*\\s*Nivel\\s+\\d+\\s*(.*)$/i);\n    const filtroExtra = matchNivel && matchNivel[1] ? matchNivel[1].trim() : null;\n    return { producto, categoria: null, placeholder: true, filtroExtra: filtroExtra || null, raw: str };\n  }\n  return { producto, categoria: resto, placeholder: false, filtroExtra: null, raw: str };\n};\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 1. Separar pedido, BOM y stock\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst normalizados = $('normalizar pedido').all().map((i) => i.json);\nconst header = normalizados.find((r) => r.tipo === 'pedido');\nconst items = normalizados.filter((r) => r.tipo === 'item');\n\nif (!header) throw new Error('[resolver_bom] No se encontró el header del pedido.');\nif (items.length === 0) throw new Error('[resolver_bom] El pedido no tiene items.');\n\nconst rowsMerged = $input.all().map((i) => i.json);\nconst bomRows = rowsMerged.filter(\n  (r) => r.tipo_mueble && r.material && r.nivel !== undefined && r.nivel !== null && r.nivel !== '',\n);\nconst stockRows = rowsMerged.filter((r) => pick(r, 'Código', 'codigo'));\n\nif (bomRows.length === 0) throw new Error('[resolver_bom] No llegaron filas de BOM.');\nif (stockRows.length === 0) throw new Error('[resolver_bom] No llegaron filas de Stock.');\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 2. Normalizar catálogo de stock\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst catalogoStock = stockRows\n  .map((r) => ({\n    codigo: String(pick(r, 'Código', 'codigo') || '').trim(),\n    seccion: String(pick(r, 'Sección', 'Seccion', 'seccion') || '').trim(),\n    producto: String(pick(r, 'Producto', 'producto') || '').trim(),\n    categoria: String(pick(r, 'Categoría', 'Categoria', 'categoria') || '').trim(),\n    color_variante: String(pick(r, 'Color / Variante', 'Color/Variante', 'color_variante') || '').trim(),\n    marca: String(pick(r, 'Marca', 'marca') || '').trim(),\n    medida: String(pick(r, 'Medida', 'medida') || '').trim(),\n    stock: parseNumber(pick(r, 'Stock Actual', 'stock_actual', 'stock', 'STOCK')),\n    precio_unit: parseMoney(pick(r, 'Precio Unit.', 'Precio Costo', 'precio_unit', 'precio')),\n    row_number: r.row_number,\n  }))\n  .filter((x) => x.codigo && x.producto);\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 3. CHEQUEO DE INVARIANTES DE INPUT (antes de resolver)\n// ═══════════════════════════════════════════════════════════════════════════\n// Un invariante violado = bug de plataforma. Se emite al output y el mapeo\n// posterior bloquea el procesamiento.\n\nconst violaciones = [];\n\nconst addViolacion = (id, tipo, mensaje, datos = {}) => {\n  violaciones.push({\n    invariante_id: id,\n    tipo,\n    mensaje,\n    datos,\n    origen: 'resolver_bom',\n  });\n};\n\n// INV-R01: Header con datos mínimos\nif (!header.pedido_id || !header.cliente_nombre) {\n  addViolacion('INV-R01', 'header_incompleto',\n    'El pedido no tiene pedido_id o cliente_nombre.',\n    { pedido_id: header.pedido_id || null, cliente_nombre: header.cliente_nombre || null });\n}\n\n// INV-R02: Cada item tiene campos mínimos\nfor (const item of items) {\n  const faltantes = [];\n  if (!item.item_id) faltantes.push('item_id');\n  if (!item.tipo_mueble) faltantes.push('tipo_mueble');\n  if (item.categoria === undefined || item.categoria === null || item.categoria === '') faltantes.push('categoria (nivel)');\n  if (!item.color) faltantes.push('color');\n  if (faltantes.length > 0) {\n    addViolacion('INV-R02', 'item_incompleto_datos',\n      `Item ${item.item_id || '(sin id)'} tiene campos faltantes: ${faltantes.join(', ')}.`,\n      { item_id: item.item_id || null, faltantes });\n  }\n}\n\n// INV-R03: Nivel numérico entre 1 y 5\nfor (const item of items) {\n  const n = parseNumber(item.categoria);\n  if (!Number.isFinite(n) || n < 1 || n > 5 || n !== Math.floor(n)) {\n    addViolacion('INV-R03', 'nivel_invalido',\n      `Item ${item.item_id} tiene nivel inválido: \"${item.categoria}\". Esperado: entero entre 1 y 5.`,\n      { item_id: item.item_id, nivel_recibido: item.categoria });\n  }\n}\n\n// INV-R04: Cada (tipo_mueble, nivel) del pedido existe en el BOM\nfor (const item of items) {\n  const nivelItem = parseNumber(item.categoria);\n  const tipoMuebleItem = String(item.tipo_mueble || '').trim();\n  if (!tipoMuebleItem || !Number.isFinite(nivelItem)) continue; // ya se reportó en R02/R03\n  const existe = bomRows.some(\n    (r) => String(r.tipo_mueble || '').trim() === tipoMuebleItem && parseNumber(r.nivel) === nivelItem,\n  );\n  if (!existe) {\n    addViolacion('INV-R04', 'bom_inexistente',\n      `No existe BOM para \"${tipoMuebleItem}\" nivel ${nivelItem}.`,\n      { item_id: item.item_id, tipo_mueble: tipoMuebleItem, nivel: nivelItem });\n  }\n}\n\n// INV-R05: Todo material del BOM parsea correctamente\nfor (const b of bomRows) {\n  const parsed = parsearMaterialBom(b.material);\n  if (!parsed || !parsed.producto) {\n    addViolacion('INV-R05', 'material_malformado',\n      `Material mal escrito en Estándares: \"${b.material}\". Formato: \"Producto - Categoría\" o \"Producto - * Nivel X\".`,\n      { tipo_mueble: b.tipo_mueble, nivel: b.nivel, material: b.material });\n  }\n}\n\n// INV-R06: Todo Producto del BOM existe en el catálogo de stock\nconst productosStock = new Set(catalogoStock.map((c) => normText(c.producto)));\nconst productosBomChequeados = new Set();\nfor (const b of bomRows) {\n  const parsed = parsearMaterialBom(b.material);\n  if (!parsed || !parsed.producto) continue;\n  const prodNorm = normText(parsed.producto);\n  if (productosBomChequeados.has(prodNorm)) continue;\n  productosBomChequeados.add(prodNorm);\n  if (!productosStock.has(prodNorm)) {\n    addViolacion('INV-R06', 'producto_sin_stock',\n      `Producto \"${parsed.producto}\" del BOM no existe en el catálogo de stock.`,\n      { producto: parsed.producto, material: b.material });\n  }\n}\n\n// INV-R07: Stock y precios del catálogo son ≥ 0\nfor (const c of catalogoStock) {\n  if (c.stock < 0) {\n    addViolacion('INV-R07', 'stock_negativo_en_catalogo',\n      `Código ${c.codigo} tiene stock negativo: ${c.stock}.`,\n      { codigo: c.codigo, stock: c.stock });\n  }\n  if (c.precio_unit < 0) {\n    addViolacion('INV-R07', 'precio_negativo_en_catalogo',\n      `Código ${c.codigo} tiene precio negativo: ${c.precio_unit}.`,\n      { codigo: c.codigo, precio: c.precio_unit });\n  }\n}\n\n// INV-R08: No hay códigos duplicados en el catálogo\nconst contadorCodigos = new Map();\nfor (const c of catalogoStock) {\n  contadorCodigos.set(c.codigo, (contadorCodigos.get(c.codigo) || 0) + 1);\n}\nfor (const [codigo, count] of contadorCodigos) {\n  if (count > 1) {\n    addViolacion('INV-R08', 'codigo_duplicado',\n      `El código \"${codigo}\" aparece ${count} veces en el catálogo.`,\n      { codigo, ocurrencias: count });\n  }\n}\n\n// INV-R09: Cantidad del BOM es > 0\nfor (const b of bomRows) {\n  const cant = parseMoney(b.cantidad);\n  if (cant <= 0) {\n    addViolacion('INV-R09', 'cantidad_bom_invalida',\n      `Material \"${b.material}\" (${b.tipo_mueble} N${b.nivel}) tiene cantidad inválida: ${b.cantidad}.`,\n      { tipo_mueble: b.tipo_mueble, nivel: b.nivel, material: b.material, cantidad: b.cantidad });\n  }\n}\n\n// INV-R10: Al menos 1 item en el pedido (ya chequeado arriba con throw, pero lo dejo explícito)\nif (items.length === 0) {\n  addViolacion('INV-R10', 'pedido_sin_items',\n    'El pedido no tiene items.',\n    { pedido_id: header.pedido_id });\n}\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 4. Resolver BOM por item (solo si no hay violaciones críticas de input)\n// ═══════════════════════════════════════════════════════════════════════════\n// Si hay violaciones, igual resolvemos lo que se pueda para tener trazabilidad,\n// pero el mapeo posterior bloqueará el procesamiento.\n\nconst consumoPorCodigo = new Map();\nconst itemsResueltos = [];\nconst erroresItems = [];\nconst itemsIncompletos = [];\n\nconst addConsumo = (elegido, materialRaw, producto, categoria, unidadBom, cantidad, itemId, colorSolicitado) => {\n  if (!consumoPorCodigo.has(elegido.codigo)) {\n    consumoPorCodigo.set(elegido.codigo, {\n      codigo: elegido.codigo,\n      material_bom: materialRaw,\n      producto: elegido.producto,\n      categoria_stock: elegido.categoria,\n      color_variante: elegido.color_variante,\n      medida: elegido.medida,\n      marca: elegido.marca,\n      unidad_bom: unidadBom,\n      precio_unit: elegido.precio_unit,\n      stock_actual: elegido.stock,\n      row_number: elegido.row_number,\n      requerido: 0,\n      items_asociados: [],\n      color_solicitado: colorSolicitado,\n    });\n  }\n  const cons = consumoPorCodigo.get(elegido.codigo);\n  cons.requerido += cantidad;\n  if (!cons.items_asociados.includes(itemId)) cons.items_asociados.push(itemId);\n};\n\nconst elegirPorColor = (candidatos, colorNormItem) => {\n  if (!colorNormItem) return null;\n  let match = candidatos.find((c) => normText(c.color_variante) === colorNormItem);\n  if (match) return match;\n  match = candidatos.find((c) => normText(c.color_variante).includes(colorNormItem));\n  if (match) return match;\n  match = candidatos.find((c) => colorNormItem.includes(normText(c.color_variante)) && c.color_variante);\n  if (match) return match;\n  match = candidatos.find((c) => normText(c.categoria) === colorNormItem);\n  if (match) return match;\n  match = candidatos.find((c) =>\n    normText(`${c.categoria} ${c.color_variante}`).includes(colorNormItem),\n  );\n  if (match) return match;\n  match = candidatos.find(\n    (c) =>\n      normText(c.color_variante).includes('color a eleccion') ||\n      normText(c.categoria).includes('color a eleccion'),\n  );\n  return match || null;\n};\n\nfor (const item of items) {\n  const nivelItem = parseNumber(item.categoria);\n  const tipoMuebleItem = String(item.tipo_mueble || '').trim();\n  const colorItem = String(item.color || '').trim();\n  const colorNormItem = normText(colorItem);\n\n  const bomItem = bomRows.filter(\n    (r) =>\n      String(r.tipo_mueble || '').trim() === tipoMuebleItem &&\n      parseNumber(r.nivel) === nivelItem,\n  );\n\n  if (bomItem.length === 0) {\n    erroresItems.push({\n      item_id: item.item_id,\n      tipo: 'sin_bom',\n      tipo_mueble: tipoMuebleItem,\n      nivel: nivelItem,\n      mensaje: `No hay BOM cargado para \"${tipoMuebleItem}\" nivel ${nivelItem}.`,\n    });\n    itemsIncompletos.push({\n      item_id: item.item_id,\n      tipo_mueble: tipoMuebleItem,\n      nivel: nivelItem,\n      color: colorItem,\n      razon: 'sin_bom',\n      mensaje: 'Item sin BOM definido — no se puede producir.',\n    });\n    continue;\n  }\n\n  const materialesBom = new Map();\n  for (const b of bomItem) {\n    const matName = String(b.material || '').trim();\n    if (!matName) continue;\n    if (!materialesBom.has(matName)) {\n      materialesBom.set(matName, {\n        material: matName,\n        parsed: parsearMaterialBom(matName),\n        unidad: String(b.unidad || '').trim(),\n        cantidad: 0,\n        notas: String(b.notas || '').trim(),\n      });\n    }\n    materialesBom.get(matName).cantidad += parseMoney(b.cantidad);\n  }\n\n  const materialesItem = [];\n  let tienePlacaAsignada = false;\n\n  for (const mat of materialesBom.values()) {\n    const parsed = mat.parsed;\n\n    if (!parsed || !parsed.producto) {\n      erroresItems.push({\n        item_id: item.item_id,\n        tipo: 'material_invalido',\n        material: mat.material,\n        producto_buscado: null,\n        mensaje: `No se pudo parsear \"${mat.material}\".`,\n      });\n      continue;\n    }\n\n    const prodNorm = normText(parsed.producto);\n    let candidatos = catalogoStock.filter((c) => normText(c.producto) === prodNorm);\n\n    if (candidatos.length === 0) {\n      erroresItems.push({\n        item_id: item.item_id,\n        tipo: 'sin_sku_en_producto',\n        material: mat.material,\n        producto_buscado: parsed.producto,\n        mensaje: `No hay códigos en stock con Producto \"${parsed.producto}\".`,\n      });\n      continue;\n    }\n\n    let elegido = null;\n\n    if (parsed.placeholder) {\n      let candFiltrados = candidatos;\n      if (parsed.filtroExtra) {\n        const filtroNorm = normText(parsed.filtroExtra);\n        candFiltrados = candidatos.filter((c) =>\n          normText(`${c.categoria} ${c.color_variante}`).includes(filtroNorm),\n        );\n        if (candFiltrados.length === 0) candFiltrados = candidatos;\n      }\n      elegido = elegirPorColor(candFiltrados, colorNormItem);\n      if (!elegido) {\n        erroresItems.push({\n          item_id: item.item_id,\n          tipo: 'sin_color',\n          material: mat.material,\n          producto_buscado: parsed.producto,\n          color: colorItem,\n          mensaje: `No hay código de \"${parsed.producto}\" en color \"${colorItem}\".`,\n        });\n        continue;\n      }\n    } else {\n      const catNorm = normText(parsed.categoria);\n      const exactos = candidatos.filter((c) => normText(c.categoria) === catNorm);\n      if (exactos.length === 0) {\n        erroresItems.push({\n          item_id: item.item_id,\n          tipo: 'sin_sku_producto_categoria',\n          material: mat.material,\n          producto_buscado: parsed.producto,\n          categoria_buscada: parsed.categoria,\n          mensaje: `No hay código con Producto=\"${parsed.producto}\" + Categoría=\"${parsed.categoria}\".`,\n        });\n        continue;\n      }\n      elegido = exactos.reduce((a, b) => (b.stock > a.stock ? b : a));\n    }\n\n    materialesItem.push({\n      material: mat.material,\n      producto_buscado: parsed.producto,\n      categoria_buscada: parsed.categoria,\n      placeholder: parsed.placeholder,\n      codigo: elegido.codigo,\n      producto_stock: elegido.producto,\n      categoria_stock: elegido.categoria,\n      color_variante_stock: elegido.color_variante,\n      medida_stock: elegido.medida,\n      unidad: mat.unidad,\n      cantidad_requerida: mat.cantidad,\n    });\n\n    if (PRODUCTOS_PLACA.has(parsed.producto)) tienePlacaAsignada = true;\n\n    addConsumo(elegido, mat.material, parsed.producto, parsed.categoria,\n      mat.unidad, mat.cantidad, item.item_id, colorItem);\n  }\n\n  const bomPidePlaca = [...materialesBom.values()].some(\n    (m) => m.parsed && PRODUCTOS_PLACA.has(m.parsed.producto),\n  );\n\n  if (bomPidePlaca && !tienePlacaAsignada) {\n    itemsIncompletos.push({\n      item_id: item.item_id,\n      tipo_mueble: tipoMuebleItem,\n      nivel: nivelItem,\n      color: colorItem,\n      razon: 'sin_placa_asignada',\n      mensaje: 'El BOM pide placa pero no se pudo asignar ninguna.',\n    });\n  }\n\n  itemsResueltos.push({\n    item_id: item.item_id,\n    linea: item.linea,\n    tipo_mueble: tipoMuebleItem,\n    nivel: nivelItem,\n    color: colorItem,\n    alto_cm: item.alto_cm,\n    ancho_cm: item.ancho_cm,\n    profundidad_cm: item.profundidad_cm,\n    materiales: materialesItem,\n    tiene_placa: tienePlacaAsignada,\n    completo: tienePlacaAsignada || !bomPidePlaca,\n  });\n}\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 5. Asignación parcial\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst asignaciones = [];\nfor (const c of consumoPorCodigo.values()) {\n  const unidadDiscreta = /^(placa|unidad|par|kit|servicio)$/i.test(c.unidad_bom);\n  const requerido = unidadDiscreta ? Math.ceil(c.requerido) : Number(c.requerido.toFixed(2));\n  const disponible = Math.max(0, c.stock_actual);\n  const asignado = Math.min(requerido, disponible);\n  const faltante = Number((requerido - asignado).toFixed(2));\n  const stock_nuevo = Number((c.stock_actual - asignado).toFixed(2));\n\n  asignaciones.push({\n    codigo: c.codigo,\n    material_bom: c.material_bom,\n    producto: c.producto,\n    categoria_stock: c.categoria_stock,\n    color_variante: c.color_variante,\n    medida: c.medida,\n    marca: c.marca,\n    unidad: c.unidad_bom,\n    precio_unit: c.precio_unit,\n    row_number: c.row_number,\n    requerido,\n    disponible: c.stock_actual,\n    asignado,\n    faltante,\n    stock_nuevo,\n    valor_stock_nuevo: Number((stock_nuevo * c.precio_unit).toFixed(2)),\n    costo_faltante: Number((faltante * c.precio_unit).toFixed(2)),\n    items_asociados: c.items_asociados,\n    color_solicitado: c.color_solicitado,\n  });\n}\nasignaciones.sort((a, b) => a.codigo.localeCompare(b.codigo));\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 6. Resumen y flags — estado_final jerárquico\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst hayFaltantes = asignaciones.some((a) => a.faltante > 0);\nconst hayErrores = erroresItems.length > 0;\nconst hayIncompletos = itemsIncompletos.length > 0;\nconst hayViolaciones = violaciones.length > 0;\nconst hayDescontable = asignaciones.some((a) => a.asignado > 0);\n\nconst costoTotalFaltantes = Number(asignaciones.reduce((s, a) => s + a.costo_faltante, 0).toFixed(2));\nconst costoTotalConsumo = Number(asignaciones.reduce((s, a) => s + a.asignado * a.precio_unit, 0).toFixed(2));\n\n// Jerarquía: VIOLACION_INVARIANTE > INCOMPLETO > PENDIENTE_MATERIAL > original\nlet estadoFinal;\nif (hayViolaciones) {\n  estadoFinal = 'VIOLACION_INVARIANTE';\n} else if (hayIncompletos) {\n  estadoFinal = 'INCOMPLETO';\n} else if (hayFaltantes || hayErrores) {\n  estadoFinal = 'PENDIENTE_MATERIAL';\n} else {\n  estadoFinal = header.estado;\n}\n\nreturn [\n  {\n    json: {\n      pedido_id: header.pedido_id,\n      cliente_id: header.cliente_id,\n      cliente_nombre: header.cliente_nombre,\n      fecha_entrega: header.fecha_entrega,\n      sena: header.sena,\n      total: header.total,\n      saldo: header.saldo,\n      notas: header.notas,\n      fecha_alta: header.fecha_alta,\n\n      cantidad_items: items.length,\n      estado_original: header.estado,\n      estado_final: estadoFinal,\n      todo_alcanza: !hayFaltantes && !hayErrores && !hayIncompletos && !hayViolaciones,\n      hay_descontable: hayDescontable,\n      hay_incompletos: hayIncompletos,\n      hay_violaciones: hayViolaciones,\n\n      asignaciones,\n      items_resueltos: itemsResueltos,\n      items_incompletos: itemsIncompletos,\n      errores_items: erroresItems,\n      violaciones,\n\n      costo_total_consumo: costoTotalConsumo,\n      costo_total_faltantes: costoTotalFaltantes,\n      cantidad_codigos_afectados: asignaciones.length,\n      cantidad_codigos_con_faltante: asignaciones.filter((a) => a.faltante > 0).length,\n      cantidad_items_incompletos: itemsIncompletos.length,\n      cantidad_violaciones: violaciones.length,\n\n      fecha_procesado: new Date().toISOString(),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        864
+      ],
+      "id": "42c079ba-a478-4043-bbe5-85a6b3e3933d",
+      "name": "Resolver BOM del pedido"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ (() => { const c = $('Resolver BOM del pedido').first().json; return JSON.stringify({ ok: true, pedido_id: c.pedido_id, estado: c.estado_final, mensaje: 'Pedido registrado. Se descontó lo disponible y los faltantes quedaron pendientes de compra.', descontado: c.asignaciones.filter(a => a.asignado > 0).map(a => ({ sku: a.sku, material: a.material, producto: a.producto, cantidad: a.asignado, stock_nuevo: a.stock_nuevo })), faltantes: c.asignaciones.filter(a => a.faltante > 0).map(a => ({ sku: a.sku, material: a.material, cantidad: a.faltante, unidad: a.unidad, proveedor: a.proveedor, costo_estimado: a.costo_faltante })), errores_items: c.errores_items, costo_total_faltantes: c.costo_total_faltantes }); })() }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        864
+      ],
+      "id": "6fec853f-8077-4722-bfd4-e3bf4633e2ea",
+      "name": "Responder faltantes"
+    },
+    {
+      "parameters": {
+        "content": "## Ejecucion Pedido\nResuelve BOM por item + color, consolida por SKU, descuenta stock disponible (política A), registra faltantes en hoja Faltantes, marca pedido PENDIENTE_MATERIAL si corresponde.",
+        "height": 524,
+        "width": 2224,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        688
+      ],
+      "id": "69180aff-a4fa-4e55-8499-238a56cae0bd",
+      "name": "Nota: Ejecucion Venta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const num = (v) => {\n  if (v == null || v === '') return 0;\n  const s = String(v)\n    .replace(/[^\\d,.\\-]/g, '')\n    .replace(/\\.(?=\\d{3}(\\D|$))/g, '')\n    .replace(',', '.');\n  const n = parseFloat(s);\n  return isFinite(n) ? n : 0;\n};\n\nconst pick = (row, ...keys) => {\n  for (const k of keys) {\n    if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];\n  }\n  return '';\n};\n\nconst rows = $input.all().map(i => i.json);\n\nconst items = rows\n  .map(r => {\n    const codigo = String(pick(r, 'Código', 'Codigo')).trim();\n    const producto = String(pick(r, 'Producto')).trim();\n    if (!codigo || !producto) return null;\n\n    return {\n      hoja_origen:   String(pick(r, 'Hoja Origen')).trim(),\n      seccion:       String(pick(r, 'Sección', 'Seccion')).trim(),\n      producto,\n      categoria:     String(pick(r, 'Categoría', 'Categoria')).trim(),\n      color_variante: String(pick(r, 'Color / Variante', 'Color/Variante')).trim(),\n      marca:         String(pick(r, 'Marca')).trim(),\n      medida:        String(pick(r, 'Medida')).trim(),\n      codigo,\n      precio_unit:   num(pick(r, 'Precio Unit.', 'Precio Unitario')),\n      stock_actual:  num(pick(r, 'Stock Actual')),\n      stock_min:     num(pick(r, 'Stock Mín.', 'Stock Min.')),\n      precio_total:  num(pick(r, 'Precio Total')),\n      reponer:       String(pick(r, 'Reponer')).trim(),\n    };\n  })\n  .filter(Boolean);\n\nconst uniqSorted = (arr) => [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));\n\nreturn [{\n  json: {\n    items,\n    totales: {\n      productos:   items.length,\n      unidades:    items.reduce((s, i) => s + i.stock_actual, 0),\n      valor_stock: Number(items.reduce((s, i) => s + i.precio_total, 0).toFixed(2)),\n    },\n    filtros: {\n      hojas_origen: uniqSorted(items.map(i => i.hoja_origen)),\n      secciones:    uniqSorted(items.map(i => i.seccion)),\n      categorias:   uniqSorted(items.map(i => i.categoria)),\n      marcas:       uniqSorted(items.map(i => i.marca)),\n    },\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        112
+      ],
+      "id": "a6979216-9ab8-4451-af51-ee847438f91e",
+      "name": "Mapear Stock"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        112
+      ],
+      "id": "7394bbfc-ac0a-4a30-a80d-2eb96f59a7a9",
+      "name": "Responder Stock"
+    },
+    {
+      "parameters": {
+        "content": "## Consultar Stock\nLee sheet completo, filtra filas sin SKU, mapea columnas, devuelve JSON.",
+        "height": 256,
+        "width": 684,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        16
+      ],
+      "id": "4d6cb787-5f44-4669-8679-438dfb19b362",
+      "name": "Nota: Consultar Stock"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1465950825,
+          "mode": "list",
+          "cachedResultName": "Historial de movimientos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1465950825"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        -160
+      ],
+      "id": "17eb4377-a41d-4ec8-bc42-d15e1581727e",
+      "name": "Leer Historial",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst results = items\n  .filter(row => row['FECHA'] || row['A'])\n  .map(row => ({\n    fecha: row['FECHA'] || row['A'] || '',\n    tipo: row['TIPO'] || row['B'] || '',\n    sku: row['SKU'] || row['C'] || '',\n    tipo_mueble: row['TIPO MUEBLE'] || row['D'] || '',\n    medidas: row['MEDIDAS'] || row['E'] || '',\n    color: row['COLOR'] || row['F'] || '',\n    cantidad: parseFloat(row['CANTIDAD'] || row['G'] || 0) || 0,\n    precio_unit: parseFloat(row['PRECIO UNIT.'] || row['H'] || 0) || 0,\n    proveedor: row['PROVEEDOR'] || row['I'] || '',\n    total: parseFloat(row['TOTAL'] || row['J'] || 0) || 0,\n  }));\n\nreturn [{ json: { items: results } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -160
+      ],
+      "id": "e252efa2-1cde-4951-9a8a-be9225685617",
+      "name": "Mapear Historial"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        -160
+      ],
+      "id": "e194c3a0-ed9f-4c7c-9370-d27abd8e5ead",
+      "name": "Responder Historial"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1465950825,
+          "mode": "list",
+          "cachedResultName": "Historial de movimientos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1465950825"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "FECHA": "={{ $json.FECHA }}",
+            "TIPO": "={{ $json.TIPO }}",
+            "SKU": "={{ $json.SKU }}",
+            "TIPO MUEBLE": "={{ $json['TIPO MUEBLE'] }}",
+            "MEDIDAS": "={{ $json.MEDIDAS }}",
+            "COLOR": "={{ $json.COLOR }}",
+            "CANTIDAD": "={{ $json.CANTIDAD }}",
+            "PRECIO UNIT.": "={{ $json['PRECIO UNIT.'] }}",
+            "PROVEEDOR": "={{ $json.PROVEEDOR }}",
+            "TOTAL": "={{ $json.TOTAL }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FECHA",
+              "displayName": "FECHA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TIPO",
+              "displayName": "TIPO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SKU",
+              "displayName": "SKU",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TIPO MUEBLE",
+              "displayName": "TIPO MUEBLE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "MEDIDAS",
+              "displayName": "MEDIDAS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "COLOR",
+              "displayName": "COLOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CANTIDAD",
+              "displayName": "CANTIDAD",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PRECIO UNIT.",
+              "displayName": "PRECIO UNIT.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PROVEEDOR",
+              "displayName": "PROVEEDOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TOTAL",
+              "displayName": "TOTAL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1696,
+        352
+      ],
+      "id": "25b80e20-1873-45fb-8e17-19d0727250cc",
+      "name": "Historial Compra",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Historial\nLee hoja Historial, mapea filas, devuelve JSON.\nEscribe en Historial despues de cada compra/venta exitosa.",
+        "height": 256,
+        "width": 684,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -256
+      ],
+      "id": "677980dd-bd45-42ea-ba1f-1e2a4d8a3fb9",
+      "name": "Nota: Historial"
+    },
+    {
+      "parameters": {
+        "content": "## Decision\n",
+        "height": 480,
+        "width": 288,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -640,
+        1008
+      ],
+      "typeVersion": 1,
+      "id": "82dd7c15-c9ad-4e98-a9f7-52220cbbce5c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7e17a0a8-2c50-40c6-a95d-02a06c421300",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "=listar_estandares",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Estandares"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "=historial",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "047ecf2b-d3c3-43b8-ad9f-8094fa849b6c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Historial"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5aff35ed-aa76-4834-b67f-c8e50377aa60",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "consultar_stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Stock"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "960ebbe0-659f-474f-a41b-4089805d8e9e",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "registrar_compra",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Compra"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f3e2d91f-c420-40c7-bfa4-80f4bee7ca12",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "registrar_pedido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Venta"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cefcd891-0e1c-4975-a969-5241fec9f73a",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "listar_pedidos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Listar Pedidos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "64d2a2e3-5970-4f7d-8f3a-ab10d0717295",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "listar_clientes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Listar Clientes"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e4872084-a4a3-48aa-a349-d2cfb0f64091",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "registrar_cliente",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Registrar Cliente"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7548f36a-5a27-4ece-ae5f-e37d12aa9ebf",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "=cambiar_estado_item",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cambiar Estado Item"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e806522c-fb10-48b5-86cc-fef8a8928766",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "editar_cliente",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Editar Cliente"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        1072
+      ],
+      "id": "fc9a32b3-fa7d-4e0b-87e7-1600d02539fe",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "## Normalizacion\n",
+        "height": 928,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        288
+      ],
+      "typeVersion": 1,
+      "id": "423018d0-7024-413d-8439-f50bfee4ea76",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5398606c-a356-49f0-bfac-3d0928e03ab0",
+              "leftValue": "={{ $json.estado }}",
+              "rightValue": "EXISTE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        416
+      ],
+      "id": "d3db3ff6-80ba-491e-a6a0-130c957af776",
+      "name": "Existe Stock?"
+    },
+    {
+      "parameters": {
+        "content": "## Historial Compra",
+        "height": 384,
+        "width": 816,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1376,
+        288
+      ],
+      "typeVersion": 1,
+      "id": "21733435-702f-4b89-b07f-ed75659660f0",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Stock Existente?').first().json;\nconst webhook = $('Normalizacion Webhook Compras').first().json;\nconst now = new Date().toISOString();\n\nreturn [{\n  json: {\n    FECHA: now,\n    TIPO: \"COMPRA\",\n    SKU: data.sku,\n    'TIPO MUEBLE': \"\",\n    MEDIDAS: \"\",\n    COLOR: \"\",\n    CANTIDAD: data.cantidad_compra,\n    'PRECIO UNIT.': data.precio_costo,\n    PROVEEDOR: webhook.proveedor || \"\",\n    TOTAL: data.cantidad_compra * data.precio_costo,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        352
+      ],
+      "id": "4c811613-6798-4f94-8c4f-59c08f17ba3e",
+      "name": "Reconstruccion de Compra"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// MAPEO CARGA VENTAS — v7.1 (sin INV-M10)\n// ───────────────────────────────────────────────────────────────────────────\n// Cambios v7.1 respecto a v7:\n//   - Removido INV-M10 (chequeo costo > 5× total). Daba falsos positivos\n//     porque algunos precios del stock son por empaque (caja de 500\n//     tornillos = $14.504) y no por unidad consumida. El ratio\n//     costo/total no es un proxy válido para \"precio mal cargado\" hasta\n//     que se resuelva el tema precio unitario vs precio por empaque.\n//   - Quedan 9 invariantes activos (M01..M09).\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst input = $input.first().json;\n\n// ── Config ────────────────────────────────────────────────────────────────\nconst PRODUCTOS_IGNORABLES = new Set([\n  'Tornillo 50mm',\n  'Tornillo 30mm',\n  'Tornillo 16mm',\n  'Clavo',\n]);\n\n// ── Datos base ────────────────────────────────────────────────────────────\nconst fechaISO = input.fecha_procesado || new Date().toISOString();\nconst fechaCorta = fechaISO.replace('T', ' ').substring(0, 16);\nconst pedidoId = input.pedido_id;\nconst cliente = input.cliente_nombre;\n\n// ── Arrays del resolver ───────────────────────────────────────────────────\nconst erroresItems = input.errores_items || [];\nconst asignaciones = input.asignaciones || [];\nconst itemsIncompletos = input.items_incompletos || [];\nconst itemsResueltos = input.items_resueltos || [];\nconst violacionesResolver = input.violaciones || [];\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 1. CHEQUEO DE INVARIANTES (sobre output del resolver)\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst violacionesMapeo = [];\n\nconst addViolacion = (id, tipo, mensaje, datos = {}) => {\n  violacionesMapeo.push({\n    invariante_id: id,\n    tipo,\n    mensaje,\n    datos,\n    origen: 'mapeo_carga_ventas',\n  });\n};\n\n// INV-M01: pedido_id y cliente_nombre no vacíos\nif (!pedidoId) {\n  addViolacion('INV-M01', 'pedido_id_vacio',\n    'El output del resolver no tiene pedido_id.',\n    { input_keys: Object.keys(input) });\n}\nif (!cliente) {\n  addViolacion('INV-M01', 'cliente_vacio',\n    'El output del resolver no tiene cliente_nombre.',\n    { pedido_id: pedidoId });\n}\n\n// INV-M02: Todo item resuelto tiene al menos 1 material (salvo que esté listado como incompleto)\nfor (const item of itemsResueltos) {\n  if (!item.materiales || item.materiales.length === 0) {\n    const yaIncompleto = itemsIncompletos.some((i) => i.item_id === item.item_id);\n    if (!yaIncompleto) {\n      addViolacion('INV-M02', 'item_sin_materiales',\n        `Item ${item.item_id} aparece en items_resueltos pero no tiene materiales ni está en items_incompletos.`,\n        { item_id: item.item_id, tipo_mueble: item.tipo_mueble, nivel: item.nivel });\n    }\n  }\n}\n\n// INV-M03: stock_nuevo >= 0 en toda asignación\nfor (const a of asignaciones) {\n  if (a.stock_nuevo < 0) {\n    addViolacion('INV-M03', 'stock_nuevo_negativo',\n      `Código ${a.codigo} tendría stock_nuevo=${a.stock_nuevo} tras descuento.`,\n      { codigo: a.codigo, stock_actual: a.disponible, asignado: a.asignado, stock_nuevo: a.stock_nuevo });\n  }\n}\n\n// INV-M04: asignado + faltante == requerido (aritmética)\nfor (const a of asignaciones) {\n  const suma = Number((a.asignado + a.faltante).toFixed(2));\n  if (Math.abs(suma - a.requerido) > 0.01) {\n    addViolacion('INV-M04', 'aritmetica_rota',\n      `Código ${a.codigo}: asignado(${a.asignado}) + faltante(${a.faltante}) ≠ requerido(${a.requerido}).`,\n      { codigo: a.codigo, asignado: a.asignado, faltante: a.faltante, requerido: a.requerido });\n  }\n}\n\n// INV-M05: Si estado_final='Confirmado' → sin faltantes ni incompletos\nif (input.estado_final === 'Confirmado') {\n  const conFaltante = asignaciones.filter((a) => a.faltante > 0);\n  if (conFaltante.length > 0) {\n    addViolacion('INV-M05', 'confirmado_con_faltantes',\n      `Resolver marcó Confirmado pero hay ${conFaltante.length} códigos con faltante.`,\n      { codigos: conFaltante.map((a) => a.codigo) });\n  }\n  if (itemsIncompletos.length > 0) {\n    addViolacion('INV-M05', 'confirmado_con_incompletos',\n      `Resolver marcó Confirmado pero hay ${itemsIncompletos.length} items incompletos.`,\n      { items: itemsIncompletos.map((i) => i.item_id) });\n  }\n}\n\n// INV-M06: Toda asignación tiene código no vacío\nfor (const a of asignaciones) {\n  if (!a.codigo || String(a.codigo).trim() === '') {\n    addViolacion('INV-M06', 'asignacion_sin_codigo',\n      'Hay una asignación con código vacío.',\n      { material: a.material_bom, producto: a.producto });\n  }\n}\n\n// INV-M07: Ningún item_id aparece simultáneamente en items_incompletos y en una asignación con asignado > 0\nconst idsIncompletos = new Set(itemsIncompletos.map((i) => i.item_id));\nfor (const a of asignaciones) {\n  if (a.asignado > 0) {\n    for (const itemId of (a.items_asociados || [])) {\n      if (idsIncompletos.has(itemId)) {\n        addViolacion('INV-M07', 'incompleto_con_descuento',\n          `Item ${itemId} está marcado incompleto pero hay descuento (${a.asignado}) en código ${a.codigo}.`,\n          { item_id: itemId, codigo: a.codigo, asignado: a.asignado });\n      }\n    }\n  }\n}\n\n// INV-M08: Fecha procesado válida y no futura\nconst fechaProc = new Date(fechaISO);\nconst ahora = new Date();\nconst margen = 60 * 60 * 1000; // 1 hora de tolerancia por timezone\nif (!Number.isFinite(fechaProc.getTime())) {\n  addViolacion('INV-M08', 'fecha_invalida',\n    `fecha_procesado no es parseable: \"${fechaISO}\".`,\n    { fecha_recibida: fechaISO });\n} else if (fechaProc.getTime() > ahora.getTime() + margen) {\n  addViolacion('INV-M08', 'fecha_futura',\n    `fecha_procesado está en el futuro: \"${fechaISO}\".`,\n    { fecha_recibida: fechaISO, ahora: ahora.toISOString() });\n}\n\n// INV-M09: No hay códigos duplicados en asignaciones\nconst contadorAsignaciones = new Map();\nfor (const a of asignaciones) {\n  contadorAsignaciones.set(a.codigo, (contadorAsignaciones.get(a.codigo) || 0) + 1);\n}\nfor (const [codigo, count] of contadorAsignaciones) {\n  if (count > 1) {\n    addViolacion('INV-M09', 'asignacion_duplicada',\n      `El código \"${codigo}\" aparece ${count} veces en asignaciones.`,\n      { codigo, ocurrencias: count });\n  }\n}\n\n// ── INV-M10 removido en v7.1 (daba falsos positivos por tema precio/empaque) ──\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 2. Clasificar y decidir si procesar\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst todasViolaciones = [...violacionesResolver, ...violacionesMapeo];\nconst hayViolaciones = todasViolaciones.length > 0;\n\nconst esErrorBloqueante = (e) =>\n  !PRODUCTOS_IGNORABLES.has(e.producto_buscado || e.categoria_stock || '');\n\nconst erroresBloqueantes = erroresItems.filter(esErrorBloqueante);\nconst asignacionesConFaltante = asignaciones.filter((a) => a.faltante > 0);\n\nconst hayBloqueante =\n  hayViolaciones ||\n  erroresBloqueantes.length > 0 ||\n  asignacionesConFaltante.length > 0 ||\n  itemsIncompletos.length > 0;\n\nconst procesar = !hayBloqueante;\n\nlet estadoFinalPedido;\nif (hayViolaciones) {\n  estadoFinalPedido = 'VIOLACION_INVARIANTE';\n} else if (itemsIncompletos.length > 0) {\n  estadoFinalPedido = 'INCOMPLETO';\n} else if (procesar) {\n  estadoFinalPedido = 'Confirmado';\n} else {\n  estadoFinalPedido = 'PENDIENTE_MATERIAL';\n}\n\n// ═══════════════════════════════════════════════════════════════════════════\n// 3. Armar items de salida según destino\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst output = [];\nconst totalPedido = Number(input.total) || 0;\n\n// ── 3a. Stock updates (solo si procesar) ──────────────────────────────────\nif (procesar) {\n  for (const a of asignaciones) {\n    if (a.asignado <= 0) continue;\n    output.push({\n      json: {\n        destino: 'stock_update',\n        pedido_id: pedidoId,\n        data: {\n          'Código': a.codigo,\n          'Stock Actual': a.stock_nuevo,\n        },\n      },\n    });\n  }\n}\n\n// ── 3b. Historial (solo si procesar) ──────────────────────────────────────\nif (procesar) {\n  const cantItems = itemsResueltos.length || 1;\n  const precioPorItem = Math.round(totalPedido / cantItems);\n\n  for (const item of itemsResueltos) {\n    const medidas = [item.alto_cm, item.ancho_cm, item.profundidad_cm]\n      .filter((v) => v !== undefined && v !== null && v !== '')\n      .map((v) => `${(Number(v) / 100).toFixed(2)}`)\n      .join(' x ');\n\n    output.push({\n      json: {\n        destino: 'historial',\n        pedido_id: pedidoId,\n        data: {\n          FECHA: fechaCorta,\n          TIPO: 'VENTA',\n          Codigo: '',\n          'TIPO MUEBLE': item.tipo_mueble,\n          MEDIDAS: medidas,\n          COLOR: item.color,\n          CANTIDAD: 1,\n          'PRECIO UNIT.': precioPorItem,\n          PROVEEDOR: '',\n          TOTAL: precioPorItem,\n          PEDIDO_ID: pedidoId,\n          CLIENTE: cliente,\n          NOTAS: `Nivel ${item.nivel} - ${item.item_id}`,\n        },\n      },\n    });\n  }\n}\n\n// ── 3c. Faltantes de stock ────────────────────────────────────────────────\nfor (const a of asignacionesConFaltante) {\n  output.push({\n    json: {\n      destino: 'faltante_stock',\n      pedido_id: pedidoId,\n      data: {\n        FECHA: fechaCorta,\n        PEDIDO_ID: pedidoId,\n        CLIENTE: cliente,\n        CODIGO: a.codigo,\n        MATERIAL: a.material_bom,\n        PRODUCTO: a.producto,\n        COLOR_VARIANTE: a.color_variante,\n        FALTANTE: a.faltante,\n        UNIDAD: a.unidad,\n        PRECIO_UNIT: a.precio_unit,\n        COSTO_FALTANTE: a.costo_faltante,\n        PROVEEDOR: a.marca,\n        ITEMS_ASOCIADOS: (a.items_asociados || []).join(', '),\n        ESTADO: 'Pendiente',\n      },\n    },\n  });\n}\n\n// ── 3d. Faltantes de catálogo ─────────────────────────────────────────────\nfor (const e of erroresItems) {\n  output.push({\n    json: {\n      destino: 'faltante_catalogo',\n      pedido_id: pedidoId,\n      data: {\n        FECHA: fechaCorta,\n        PEDIDO_ID: pedidoId,\n        CLIENTE: cliente,\n        ITEM_ID: e.item_id || '',\n        MATERIAL: e.material || '',\n        PRODUCTO_BUSCADO: e.producto_buscado || '',\n        CATEGORIA_BUSCADA: e.categoria_buscada || e.categoria_stock || '',\n        TIPO_ERROR: e.tipo || '',\n        MENSAJE: e.mensaje || '',\n        BLOQUEANTE: esErrorBloqueante(e) ? 'SÍ' : 'NO',\n        ESTADO: 'Pendiente',\n      },\n    },\n  });\n}\n\n// ── 3e. Alertas ───────────────────────────────────────────────────────────\nfor (const v of todasViolaciones) {\n  output.push({\n    json: {\n      destino: 'alerta',\n      pedido_id: pedidoId,\n      data: {\n        FECHA: fechaCorta,\n        PEDIDO_ID: pedidoId,\n        CLIENTE: cliente || '',\n        ORIGEN: v.origen || 'desconocido',\n        INVARIANTE_ID: v.invariante_id || '',\n        TIPO: v.tipo || '',\n        MENSAJE: v.mensaje || '',\n        DATOS: JSON.stringify(v.datos || {}),\n        ESTADO: 'Pendiente',\n      },\n    },\n  });\n}\n\n// ── 3f. Update del pedido ─────────────────────────────────────────────────\noutput.push({\n  json: {\n    destino: 'pedido_update',\n    pedido_id: pedidoId,\n    data: {\n      pedido_id: pedidoId,\n      estado: estadoFinalPedido,\n    },\n  },\n});\n\n// ── 3g. Update de items ───────────────────────────────────────────────────\nconst idsItemsResueltos = itemsResueltos.map((i) => i.item_id).filter(Boolean);\nconst idsItemsIncompletos = itemsIncompletos.map((i) => i.item_id).filter(Boolean);\nconst idsItemsTodos = [...new Set([...idsItemsResueltos, ...idsItemsIncompletos])];\n\nfor (const itemId of idsItemsTodos) {\n  output.push({\n    json: {\n      destino: 'item_update',\n      pedido_id: pedidoId,\n      data: {\n        item_id: itemId,\n        estado_item: estadoFinalPedido,\n      },\n    },\n  });\n}\n\n// ── 3h. Resumen ───────────────────────────────────────────────────────────\noutput.push({\n  json: {\n    destino: 'resumen',\n    pedido_id: pedidoId,\n    data: {\n      pedido_id: pedidoId,\n      cliente,\n      procesar,\n      estado_final: estadoFinalPedido,\n      cantidad_items: itemsResueltos.length,\n      codigos_descontados: procesar ? asignaciones.filter((a) => a.asignado > 0).length : 0,\n      filas_historial: procesar ? itemsResueltos.length : 0,\n      faltantes_stock: asignacionesConFaltante.length,\n      faltantes_catalogo_bloqueantes: erroresBloqueantes.length,\n      faltantes_catalogo_ignorables: erroresItems.length - erroresBloqueantes.length,\n      violaciones_totales: todasViolaciones.length,\n      violaciones_resolver: violacionesResolver.length,\n      violaciones_mapeo: violacionesMapeo.length,\n      costo_total_consumo: procesar ? input.costo_total_consumo : 0,\n      costo_total_faltantes: input.costo_total_faltantes,\n    },\n  },\n});\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        864
+      ],
+      "id": "69557953-d0a4-46cb-9b5a-1fef4570d35d",
+      "name": "Mapeo Carga Ventas"
+    },
+    {
+      "parameters": {
+        "content": "## Estandares\n",
+        "height": 256,
+        "width": 1020,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -528
+      ],
+      "id": "f191d408-0573-4887-befb-b142ff9928f0",
+      "name": "Nota: Historial1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1284713931,
+          "mode": "list",
+          "cachedResultName": "Estandares Materiales",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1284713931"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        -448
+      ],
+      "id": "2db551e4-579b-4242-934a-8427901a647c",
+      "name": "Estandares matariales",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        -448
+      ],
+      "id": "036fca0a-d5ca-4dee-bdfd-11740b9bcb02",
+      "name": "Responder Estandares"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -448
+      ],
+      "id": "5d793fa8-4c50-4a1f-af3e-ae680e85f0b0",
+      "name": "mapear estandares"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\n\nconst nivelMap = { 2: 'Intermedio', 3: 'Premium', 4: 'Lujo Laqueado', 5: 'Ultra Premium' };\n\nconst map = {};\nitems.forEach(row => {\n  const tipo = row.tipo_mueble;\n  const nivel = row.nivel;\n  if (!tipo || !nivel) return;\n  \n  const key = `${tipo}__${nivel}`;\n  const nivelNombre = nivelMap[nivel] || `Nivel ${nivel}`;\n  \n  if (!map[key]) {\n    map[key] = {\n      tipo_mueble: key,\n      nombre_display: `${tipo} - ${nivelNombre}`,\n      descripcion: `Nivel ${nivel} (${nivelNombre})`,\n      materiales: []\n    };\n  }\n  \n  map[key].materiales.push({\n    componente: row.material || '',\n    buscar_por: 'CATEGORIA',\n    sku_fijo: '',\n    categoria_busqueda: row.material || '',\n    cantidad_por_unidad: row.cantidad || 0,\n    unidad: row.unidad || '',\n    notas: row.notas || ''\n  });\n});\n\nreturn [{ json: { estandares: Object.values(map) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -448
+      ],
+      "id": "7263e38f-cb81-4bec-94e9-9c1b014e21db",
+      "name": "enviar estandares"
+    },
+    {
+      "parameters": {
+        "content": "# STOCK\n",
+        "height": 1856,
+        "width": 2560,
+        "color": "#171717"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        -608
+      ],
+      "typeVersion": 1,
+      "id": "ba9973aa-3a89-452c-8f6d-dc143d30248e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# CLIENTES\n",
+        "height": 1712,
+        "width": 1024,
+        "color": "#171717"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        1264
+      ],
+      "typeVersion": 1,
+      "id": "0391354a-9c20-4892-8932-de8957b68301",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Listar Clientes\n",
+        "height": 288,
+        "width": 720,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        1744
+      ],
+      "typeVersion": 1,
+      "id": "a8cfab7c-9447-4e1b-9597-d8af8957e02e",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 915059545,
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=915059545"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -256,
+        1840
+      ],
+      "id": "46050ffd-5d92-4351-b83a-c6a7bf5eddad",
+      "name": "Leer clientes",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .map(item => {\n    const out = {};\n    for (const [key, value] of Object.entries(item.json)) {\n      if (key === 'row_number') continue;\n      out[key] = value == null ? '' : (typeof value === 'string' ? value.trim() : value);\n    }\n    return { json: out };\n  })\n  .filter(item => Object.values(item.json).some(v => v !== '' && v != null));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        1840
+      ],
+      "id": "8516a64d-40a0-4237-b036-a7fe6e642e61",
+      "name": "Mapear Clientes"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, clientes: $input.all().map(i => i.json) } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        1840
+      ],
+      "id": "3fc4846a-5371-486e-aca5-ba7ace98329d",
+      "name": "Responder Clientes"
+    },
+    {
+      "parameters": {
+        "content": "## Listar Estados de Pedidos\n\n",
+        "height": 368,
+        "width": 944,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        1360
+      ],
+      "typeVersion": 1,
+      "id": "bd76aa22-2eee-4e3f-8d5e-700c4deae5fe",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 440974926,
+          "mode": "list",
+          "cachedResultName": "Estado de Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=440974926"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        1424
+      ],
+      "id": "1c8aaa8f-fe16-4201-85ba-afc4c424ec0e",
+      "name": "Leer Estados de Pedidos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all().map(i => i.json);\n\n// Separar cabeceras de items según qué campos tienen\nconst cabeceras = all.filter(r => r.cliente_id !== undefined && r.total !== undefined);\nconst items     = all.filter(r => r.item_id !== undefined && r.tipo_mueble !== undefined);\n\n// Indexar items por pedido_id\nconst itemsByPedido = {};\nfor (const it of items) {\n  const pid = it.pedido_id;\n  if (!pid) continue;\n  if (!itemsByPedido[pid]) itemsByPedido[pid] = [];\n\n  // Limpiar el item\n  const cleanItem = {};\n  for (const [k, v] of Object.entries(it)) {\n    if (k === 'row_number' || k === 'pedido_id') continue;\n    cleanItem[k] = v == null ? '' : (typeof v === 'string' ? v.trim() : v);\n  }\n  itemsByPedido[pid].push(cleanItem);\n}\n\n// Armar salida: una cabecera por pedido con sus items adentro\nreturn cabeceras\n  .filter(p => p.pedido_id) // descartar filas vacías\n  .map(p => {\n    const out = {};\n    for (const [k, v] of Object.entries(p)) {\n      if (k === 'row_number' || k === 'cabecera' || k === 'items') continue;\n      out[k] = v == null ? '' : (typeof v === 'string' ? v.trim() : v);\n    }\n    // Ordenar items por línea\n    const its = (itemsByPedido[p.pedido_id] || [])\n      .sort((a, b) => (a.linea || 0) - (b.linea || 0));\n    out.items = its;\n    return { json: out };\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        1488
+      ],
+      "id": "208b82dc-b936-48f4-877c-338a7063efe0",
+      "name": "Mapear Estado de Pedidos"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, pedidos: $input.all().map(i => i.json) } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        1488
+      ],
+      "id": "9e2c7f95-e5c2-491f-94b5-3d2d49ceb834",
+      "name": "Responder Estado de Pedidos"
+    },
+    {
+      "parameters": {
+        "content": "## Crear Cliente\n\n",
+        "height": 288,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        2048
+      ],
+      "typeVersion": 1,
+      "id": "50afeaf1-970d-4fc4-8d0f-5aa0f873d0ba",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, mensaje: \"Cliente registrado\", nombre: $json.nombre, email: $json.email } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        2144
+      ],
+      "id": "7c453218-09b6-49d5-84af-87518714737b",
+      "name": "Cliente Creado"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 915059545,
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=915059545"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $json.body.data.nombre }}",
+            "telefono": "={{ $json.body.data.telefono }}",
+            "email": "={{ $json.body.data.email }}",
+            "direccion": "={{ $json.body.data.direccion }}",
+            "localidad": "={{ $json.body.data.localidad }}",
+            "notas": "={{ $json.body.data.notas }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "cliente_id",
+              "displayName": "cliente_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "direccion",
+              "displayName": "direccion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "localidad",
+              "displayName": "localidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_alta",
+              "displayName": "fecha_alta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -256,
+        2144
+      ],
+      "id": "8b2c0145-7073-400a-83df-bc86b8920787",
+      "name": " Crear Cliente",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// === CONFIG ===\nconst PIN_ESPERADO = '0708';\nconst MIN_DIMENSION_CM = 10;\nconst MAX_DIMENSION_CM = 500;\nconst MIN_MONTO = 0;\nconst MAX_MONTO = 100000000000000000000000;\nconst MAX_ITEMS_POR_PEDIDO = 30;\nconst TIPOS_MUEBLE_VALIDOS = [\n  'Bajo Mesada 2 Puertas',\n  'Bajo Mesada Cajonera',\n  'Alacena 2 Puertas',\n  'Placard Estándar',\n  'Rack de TV',\n];\nconst NIVELES_VALIDOS = ['2', '3', '4', '5'];\nconst ESTADO_INICIAL = 'Pendiente';\n\n// === HELPERS ===\nconst parseNum = (v) => {\n  if (v === null || v === undefined || v === '') return NaN;\n  const s = String(v).replace(/\\./g, '').replace(',', '.');\n  const n = Number(s);\n  return isFinite(n) ? n : NaN;\n};\nconst inRange = (n, min, max) => isFinite(n) && n >= min && n <= max;\nconst isClienteIdValido = (s) => typeof s === 'string' && /^CLI-\\d{3,}$/.test(s);\nconst isFechaISO = (s) => typeof s === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(s) && !isNaN(new Date(s).getTime());\nconst limpiar = (s) => (typeof s === 'string' ? s.trim() : '');\n\n// === INPUT ===\nconst payload = $input.first().json || {};\nconst body = payload.body || {};\nconst data = body.data || {};\nconst errores = [];\n\n// === PIN / ACTION ===\nif (String(body.pin || '') !== PIN_ESPERADO) errores.push('PIN inválido');\nif (body.action !== 'registrar_pedido') {\n  errores.push(`action inválida \"${body.action}\" (esperado \"registrar_pedido\")`);\n}\n\n// === CLIENTE ===\nif (!isClienteIdValido(data.cliente_id)) {\n  errores.push(`cliente_id inválido \"${data.cliente_id}\"`);\n}\n\n// === FECHA ENTREGA ===\nif (!isFechaISO(data.fecha_entrega)) {\n  errores.push(`fecha_entrega inválida \"${data.fecha_entrega}\" (YYYY-MM-DD)`);\n} else {\n  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);\n  if (new Date(data.fecha_entrega) < hoy) {\n    errores.push(`fecha_entrega en el pasado \"${data.fecha_entrega}\"`);\n  }\n}\n\n// === MONTOS ===\nconst total = parseNum(data.total);\nif (!inRange(total, MIN_MONTO, MAX_MONTO)) {\n  errores.push(`\"${data.total}\" (total debe ser número > 0 y ≤ ${MAX_MONTO})`);\n}\nconst sena = parseNum(data.sena);\nif (!inRange(sena, 0, MAX_MONTO)) {\n  errores.push(`\"${data.sena}\" (seña debe ser número ≥ 0 y ≤ ${MAX_MONTO})`);\n}\nif (isFinite(total) && isFinite(sena) && sena > total) {\n  errores.push(`la seña (${sena}) no puede superar el total (${total})`);\n}\nconst saldo = isFinite(total) && isFinite(sena) ? total - sena : 0;\n\n// === ITEMS ===\nconst items = Array.isArray(data.items) ? data.items : [];\nif (items.length === 0) errores.push('items vacío: el pedido debe tener al menos un mueble');\nif (items.length > MAX_ITEMS_POR_PEDIDO) {\n  errores.push(`demasiados muebles (${items.length} > ${MAX_ITEMS_POR_PEDIDO})`);\n}\n\nconst itemsNorm = [];\nitems.forEach((it, idx) => {\n  const prefix = `items[${idx}]`;\n  const n = {};\n\n  if (!TIPOS_MUEBLE_VALIDOS.includes(it.tipo_mueble)) {\n    errores.push(`${prefix}.tipo_mueble inválido \"${it.tipo_mueble}\"`);\n  } else n.tipo_mueble = it.tipo_mueble;\n\n  const alto = parseNum(it.alto);\n  if (!inRange(alto, MIN_DIMENSION_CM, MAX_DIMENSION_CM)) {\n    errores.push(`${prefix}.alto \"${it.alto}\" (entre ${MIN_DIMENSION_CM} y ${MAX_DIMENSION_CM} cm)`);\n  } else n.alto_cm = alto;\n\n  const ancho = parseNum(it.ancho);\n  if (!inRange(ancho, MIN_DIMENSION_CM, MAX_DIMENSION_CM)) {\n    errores.push(`${prefix}.ancho \"${it.ancho}\" (entre ${MIN_DIMENSION_CM} y ${MAX_DIMENSION_CM} cm)`);\n  } else n.ancho_cm = ancho;\n\n  const prof = parseNum(it.profundidad);\n  if (!inRange(prof, MIN_DIMENSION_CM, MAX_DIMENSION_CM)) {\n    errores.push(`${prefix}.profundidad \"${it.profundidad}\" (entre ${MIN_DIMENSION_CM} y ${MAX_DIMENSION_CM} cm)`);\n  } else n.profundidad_cm = prof;\n\n  const color = limpiar(it.color);\n  if (!color) errores.push(`${prefix}.color vacío`);\n  else n.color = color;\n\n  const nivel = String(it.nivel ?? '').trim();\n  if (!NIVELES_VALIDOS.includes(nivel)) {\n    errores.push(`${prefix}.nivel \"${it.nivel}\" (2–5)`);\n  } else n.categoria = nivel;\n\n  itemsNorm.push(n);\n});\n\n// === CORTE POR ERRORES ===\nif (errores.length > 0) {\n  throw new Error('[normalizar_pedido] ' + errores.join(' | '));\n}\n\n// === IDS Y METADATA ===\nconst ahora = new Date();\nconst yy = String(ahora.getFullYear()).slice(-2);\nconst mm = String(ahora.getMonth() + 1).padStart(2, '0');\nconst dd = String(ahora.getDate()).padStart(2, '0');\nconst hh = String(ahora.getHours()).padStart(2, '0');\nconst mi = String(ahora.getMinutes()).padStart(2, '0');\nconst ss = String(ahora.getSeconds()).padStart(2, '0');\nconst pedidoId = `PED-${yy}${mm}${dd}-${hh}${mi}${ss}`;\nconst fechaAlta = `${ahora.getFullYear()}-${mm}-${dd}`;\nconst notas = limpiar(data.notas);\n\n// === SALIDA: 1 item \"pedido\" + N items \"item\" ===\nconst salida = [];\n\nsalida.push({\n  json: {\n    tipo: 'pedido',\n    pedido_id: pedidoId,\n    cliente_id: data.cliente_id,\n    cliente_nombre: limpiar(data.cliente_nombre),\n    fecha_entrega: data.fecha_entrega,\n    sena: sena,\n    total: total,\n    saldo: saldo,\n    estado: ESTADO_INICIAL,\n    notas: notas,\n    cantidad_muebles: itemsNorm.length,\n    fecha_alta: fechaAlta,\n  },\n});\n\nitemsNorm.forEach((m, i) => {\n  salida.push({\n    json: {\n      tipo: 'item',\n      item_id: `${pedidoId}-${String(i + 1).padStart(2, '0')}`,\n      pedido_id: pedidoId,\n      linea: i + 1,\n      tipo_mueble: m.tipo_mueble,\n      alto_cm: m.alto_cm,\n      ancho_cm: m.ancho_cm,\n      profundidad_cm: m.profundidad_cm,\n      color: m.color,\n      categoria: m.categoria,\n      estado_item: ESTADO_INICIAL,\n    },\n  });\n});\n\nreturn salida;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        912
+      ],
+      "id": "cc5ec352-84e4-4398-aae4-6bb4629c206d",
+      "name": "normalizar pedido"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 440974926,
+          "mode": "list",
+          "cachedResultName": "Estado de Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=440974926"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "pedido_id": "={{ $json.pedido_id }}",
+            "cliente_id": "={{ $json.cliente_id }}",
+            "fecha_entrega": "={{ $json.fecha_entrega }}",
+            "sena": "={{ $json.sena }}",
+            "total": "={{ $json.total }}",
+            "saldo": "={{ $json.saldo }}",
+            "estado": "={{ $json.estado }}",
+            "notas": "={{ $json.notas }}",
+            "cantidad_muebles": "={{ $json.cantidad_muebles }}",
+            "fecha_alta": "={{ $json.fecha_alta }}",
+            "cliente_nombre": "={{ $json.cliente_nombre }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "pedido_id",
+              "displayName": "pedido_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cliente_id",
+              "displayName": "cliente_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cliente_nombre",
+              "displayName": "cliente_nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_entrega",
+              "displayName": "fecha_entrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sena",
+              "displayName": "sena",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "saldo",
+              "displayName": "saldo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad_muebles",
+              "displayName": "cantidad_muebles",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_alta",
+              "displayName": "fecha_alta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cabecera",
+              "displayName": "cabecera",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "items",
+              "displayName": "items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        768
+      ],
+      "id": "0ddb8cac-5114-4254-bde7-a55040d488fc",
+      "name": "actualizar pedidos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1148596997,
+          "mode": "list",
+          "cachedResultName": "Items de Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1148596997"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "item_id": "={{ $json.item_id }}",
+            "pedido_id": "={{ $json.pedido_id }}",
+            "linea": "={{ $json.linea }}",
+            "alto_cm": "={{ $json.alto_cm }}",
+            "tipo_mueble": "={{ $json.tipo_mueble }}",
+            "profundidad_cm": "={{ $json.profundidad_cm }}",
+            "ancho_cm": "={{ $json.ancho_cm }}",
+            "color": "={{ $json.color }}",
+            "categoria": "={{ $json.categoria }}",
+            "estado_item": "={{ $json.estado_item }}"
+          },
+          "matchingColumns": [
+            "item_id"
+          ],
+          "schema": [
+            {
+              "id": "item_id",
+              "displayName": "item_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pedido_id",
+              "displayName": "pedido_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linea",
+              "displayName": "linea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mueble",
+              "displayName": "tipo_mueble",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alto_cm",
+              "displayName": "alto_cm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ancho_cm",
+              "displayName": "ancho_cm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "profundidad_cm",
+              "displayName": "profundidad_cm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "color",
+              "displayName": "color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_item",
+              "displayName": "estado_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        912
+      ],
+      "id": "fb6f083d-acb5-44bc-b3dd-cb022b0d6550",
+      "name": "actualizar items",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\":false,\"error\":}\"\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        192,
+        1072
+      ],
+      "id": "b9a48b1f-b02d-406e-ac5d-38e02dc8f4e8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "pedido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f37e3d34-d929-43a3-aff0-618d791fabf1"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Actualizar Pedidos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bb6c944f-99f2-43e3-9a7f-d4568b6cc079",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "item",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Actualizar Items"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8387aa96-7d93-4daa-90d7-7630ed0a8c9f",
+                    "leftValue": "={{ true }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        896
+      ],
+      "id": "8559fb6c-c57c-4e6f-94a5-206fbd576520",
+      "name": "Decision venta"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1758986104,
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1758986104"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A2:Z"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        112
+      ],
+      "id": "0394042e-f078-4489-b912-4b36d97c7063",
+      "name": "Leer Stock",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ (() => { const c = $('Resolver BOM del pedido').first().json; return JSON.stringify({ ok: true, pedido_id: c.pedido_id, estado: c.estado_final, mensaje: 'Pedido registrado. Stock descontado correctamente.', descontado: c.asignaciones.map(a => ({ sku: a.sku, material: a.material, producto: a.producto, cantidad: a.asignado, stock_nuevo: a.stock_nuevo })), faltantes: [], errores_items: c.errores_items }); })() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        512
+      ],
+      "id": "f5e9a2b1-9a7d-4a77-b2c1-4d3e5f6a7b80",
+      "name": "Responder pedido OK"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1465950825,
+          "mode": "list",
+          "cachedResultName": "Historial de movimientos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1465950825"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "FECHA": "={{ $json.FECHA }}",
+            "TIPO": "={{ $json.TIPO }}",
+            "SKU": "={{ $json.SKU }}",
+            "TIPO MUEBLE": "={{ $json['TIPO MUEBLE'] }}",
+            "MEDIDAS": "={{ $json.MEDIDAS }}",
+            "COLOR": "={{ $json.COLOR }}",
+            "CANTIDAD": "={{ $json.CANTIDAD }}",
+            "PRECIO UNIT.": "={{ $json['PRECIO UNIT.'] }}",
+            "PROVEEDOR": "={{ $json.PROVEEDOR }}",
+            "TOTAL": "={{ $json.TOTAL }}",
+            "PEDIDO_REF": "={{ $json.PEDIDO_REF }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FECHA",
+              "displayName": "FECHA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TIPO",
+              "displayName": "TIPO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SKU",
+              "displayName": "SKU",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TIPO MUEBLE",
+              "displayName": "TIPO MUEBLE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "MEDIDAS",
+              "displayName": "MEDIDAS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "COLOR",
+              "displayName": "COLOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CANTIDAD",
+              "displayName": "CANTIDAD",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PRECIO UNIT.",
+              "displayName": "PRECIO UNIT.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PROVEEDOR",
+              "displayName": "PROVEEDOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TOTAL",
+              "displayName": "TOTAL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PEDIDO_REF",
+              "displayName": "PEDIDO_REF",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1696,
+        512
+      ],
+      "id": "d4e5f6a7-b8c9-0123-defa-3456789012cd",
+      "name": "Historial Venta",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        320,
+        912
+      ],
+      "id": "0d4b0eba-3797-46be-a17f-6bd9571baaf6",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "content": "## Actualizar Estado Pedido\n\n\n",
+        "height": 288,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        2352
+      ],
+      "typeVersion": 1,
+      "id": "bf3d02de-7a2c-45cc-99f5-4cbe6f80ad83",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1148596997,
+          "mode": "list",
+          "cachedResultName": "Items de Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1148596997"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        1568
+      ],
+      "id": "53cb4de2-a604-4c45-9c4b-58de2773e1fa",
+      "name": "Leer Items",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        48,
+        1488
+      ],
+      "id": "ca3b1421-1ba4-4fdf-81dc-75dc9d3ca33c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "## Actualizar Cliente\n\n\n\n",
+        "height": 288,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        2656
+      ],
+      "typeVersion": 1,
+      "id": "50503aee-a212-4ad4-bb1e-c8073acc45db",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1148596997,
+          "mode": "list",
+          "cachedResultName": "Items de Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1148596997"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "estado_item": "={{ $json.body.data.estado_item }}",
+            "item_id": "={{ $json.body.data.item_id }}"
+          },
+          "matchingColumns": [
+            "item_id"
+          ],
+          "schema": [
+            {
+              "id": "item_id",
+              "displayName": "item_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pedido_id",
+              "displayName": "pedido_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "linea",
+              "displayName": "linea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tipo_mueble",
+              "displayName": "tipo_mueble",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "alto_cm",
+              "displayName": "alto_cm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ancho_cm",
+              "displayName": "ancho_cm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "profundidad_cm",
+              "displayName": "profundidad_cm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "color",
+              "displayName": "color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "estado_item",
+              "displayName": "estado_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -256,
+        2448
+      ],
+      "id": "a4603c3f-855e-4cc2-8c41-ea8b8bbf47cf",
+      "name": "Actualizar Estado Pedido",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 915059545,
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=915059545"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "cliente_id": "={{ $json.body.data.cliente_id }}",
+            "nombre": "={{ $json.body.data.nombre }}",
+            "telefono": "={{ $json.body.data.telefono }}",
+            "email": "={{ $json.body.data.email }}",
+            "direccion": "={{ $json.body.data.direccion }}",
+            "localidad": "={{ $json.body.data.localidad }}",
+            "notas": "={{ $json.body.data.notas }}"
+          },
+          "matchingColumns": [
+            "cliente_id"
+          ],
+          "schema": [
+            {
+              "id": "cliente_id",
+              "displayName": "cliente_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "direccion",
+              "displayName": "direccion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "localidad",
+              "displayName": "localidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -256,
+        2752
+      ],
+      "id": "0ecbbefc-ee4e-4c0a-9c3b-9671ba5526f4",
+      "name": "Actualizar Cliente",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": true,\n  \"estado\": \"{{ $json.estado_item }}\",\n  \"item_id\": \"{{ $json.item_id }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        2448
+      ],
+      "id": "0aed11cb-8ba9-4b8f-84e1-05c4839e3cbf",
+      "name": "Responder Estado de Items"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, mensaje: \"Cliente registrado\", nombre: $json.nombre, email: $json.email } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        2752
+      ],
+      "id": "165dc72b-5a18-4d16-8766-7a9a00c753ed",
+      "name": "Cliente Actualizado"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        816,
+        864
+      ],
+      "id": "715b39b9-f9c0-41b7-b133-130b2f3a71df",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock demo"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1758986104,
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1758986104"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A2:M"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        912
+      ],
+      "id": "719be277-27c7-423a-97f8-fa396d08ce91",
+      "name": "Leer stock para venta",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e347e6f0-5218-44da-b085-66b13ccbc0f9",
+              "leftValue": "={{ $json[\"Sección\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d82fafc3-a394-4886-81c7-2d5110764ee7",
+              "leftValue": "={{ $json[\"Categoría\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        912
+      ],
+      "id": "ee3e94c1-bcc2-4686-9fff-b46d62a4cb8f",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.destino }}",
+                    "rightValue": "historial",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "99e3cfa9-5f04-439d-b3ac-8964e622436c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Historial"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7b82885b-8f27-4c52-b6cd-95ad89ff7727",
+                    "leftValue": "={{ $json.destino }}",
+                    "rightValue": "faltante_stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Faltante Stock"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fbd3551f-0203-4d9c-bbc3-c4f2440f3b25",
+                    "leftValue": "={{ $json.destino }}",
+                    "rightValue": "=faltante_catalogo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Faltante Catalogo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        848
+      ],
+      "id": "eff70b8b-b4f5-4c38-b521-1db3ebf78705",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ (() => { const c = $('Resolver BOM del pedido').first().json; return JSON.stringify({ ok: true, pedido_id: c.pedido_id, estado: c.estado_final, mensaje: 'Pedido registrado. Se descontó lo disponible y los faltantes quedaron pendientes de compra.', descontado: c.asignaciones.filter(a => a.asignado > 0).map(a => ({ sku: a.sku, material: a.material, producto: a.producto, cantidad: a.asignado, stock_nuevo: a.stock_nuevo })), faltantes: c.asignaciones.filter(a => a.faltante > 0).map(a => ({ sku: a.sku, material: a.material, cantidad: a.faltante, unidad: a.unidad, proveedor: a.proveedor, costo_estimado: a.costo_faltante })), errores_items: c.errores_items, costo_total_faltantes: c.costo_total_faltantes }); })() }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        1040
+      ],
+      "id": "05f8058c-0a9d-4e66-930a-9ec6ddb5868d",
+      "name": "Responder Fatlantes Catalogo"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\":false,\"error\":\"No se encuentra ese stock en al ficha\"}",
+        "options": {
+          "responseCode": 409
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        512
+      ],
+      "id": "c36dc75f-49b0-48fa-aee2-3a092c411a1f",
+      "name": "No Existe Stock"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e347e6f0-5218-44da-b085-66b13ccbc0f9",
+              "leftValue": "={{ $json[\"Sección\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d82fafc3-a394-4886-81c7-2d5110764ee7",
+              "leftValue": "={{ $json[\"Categoría\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        416
+      ],
+      "id": "fe5b5537-5dd4-45ca-bcba-326ad784f0e9",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcular nuevos valores para update en Sheets\nconst catalogo = $('Filter1').all();\nconst compras  = $input.all(); // viene del Switch rama EXISTE\n\nconst norm = (v) => String(v ?? '').trim().toUpperCase();\nconst toNum = (v) => {\n  const n = Number(String(v ?? '0').replace(',', '.'));\n  return Number.isFinite(n) ? n : 0;\n};\n\n// Indexar catálogo por código\nconst byCodigo = new Map();\nfor (const item of catalogo) {\n  byCodigo.set(norm(item.json['Código']), item.json);\n}\n\nreturn compras.map(item => {\n  const d = item.json;\n  const row = byCodigo.get(norm(d.codigo)) ?? {};\n\n  const stockActual = toNum(row['Stock Actual']);\n  const precioUnit  = toNum(row['Precio Unit.']);\n\n  const cantidadNueva = toNum(d.cantidad);\n  const precioNuevo   = toNum(d.precio);\n\n  const nuevoStock = stockActual + cantidadNueva;\n  // Valor total = stock × precio unitario (el que corresponda)\n  const nuevoValor = nuevoStock * (precioNuevo || precioUnit);\n\n  return {\n    json: {\n      ...d,\n      stock_anterior: stockActual,\n      nuevo_stock: nuevoStock,\n      nuevo_valor: nuevoValor,\n      proveedor: d.proveedor,\n    },\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        352
+      ],
+      "id": "6d5a7bb5-57e9-4fef-9aca-d82142b7b785",
+      "name": "Mapeo de carga de stock"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1758986104,
+          "mode": "list",
+          "cachedResultName": "Materiales y Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit#gid=1758986104"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "STOCK CONSOLIDADO — MUEBLERÍA FONTANA"
+          ],
+          "schema": [
+            {
+              "id": "STOCK CONSOLIDADO — MUEBLERÍA FONTANA",
+              "displayName": "STOCK CONSOLIDADO — MUEBLERÍA FONTANA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1712,
+        1040
+      ],
+      "id": "61214975-b606-411e-bedd-1b3432f7d3f3",
+      "name": "Actualizar Errores de Catalogo",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Faltantes",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "faltante_id": "={{ $json.faltante_id }}",
+            "pedido_id": "={{ $json.pedido_id }}",
+            "item_id": "={{ $json.item_id }}",
+            "sku": "={{ $json.sku }}",
+            "material": "={{ $json.material }}",
+            "cantidad_faltante": "={{ $json.cantidad_faltante }}",
+            "unidad": "={{ $json.unidad }}",
+            "proveedor": "={{ $json.proveedor }}",
+            "precio_costo": "={{ $json.precio_costo }}",
+            "costo_estimado": "={{ $json.costo_estimado }}",
+            "estado": "={{ $json.estado }}",
+            "fecha_alta": "={{ $json.fecha_alta }}",
+            "fecha_resuelto": "={{ $json.fecha_resuelto }}",
+            "notas": "={{ $json.notas }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "faltante_id",
+              "displayName": "faltante_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pedido_id",
+              "displayName": "pedido_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "item_id",
+              "displayName": "item_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sku",
+              "displayName": "sku",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "material",
+              "displayName": "material",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad_faltante",
+              "displayName": "cantidad_faltante",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "unidad",
+              "displayName": "unidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proveedor",
+              "displayName": "proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "precio_costo",
+              "displayName": "precio_costo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "costo_estimado",
+              "displayName": "costo_estimado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_alta",
+              "displayName": "fecha_alta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_resuelto",
+              "displayName": "fecha_resuelto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1664,
+        864
+      ],
+      "id": "b2c3d4e5-f6a7-8901-bcde-1234567890ab",
+      "name": "Actualizar Faltantes",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    " Crear Cliente": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Cliente Creado",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Decision venta": {
+      "main": [
+        [
+          {
+            "node": "actualizar pedidos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "actualizar items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Respond to Webhook",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Estandares matariales": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "mapear estandares",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Existe Stock?": {
+      "main": [
+        [
+          {
+            "node": "Mapeo de carga de stock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Existe Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ficha stock": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Historial Compra": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Responder compra OK",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Leer BOM venta": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Estados de Pedidos": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Historial": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mapear Historial",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Leer Stock": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mapear Stock",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Leer clientes": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mapear Clientes",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mapear Clientes": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Responder Clientes",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mapear Estado de Pedidos": {
+      "main": [
+        [
+          {
+            "node": "Responder Estado de Pedidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Historial": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Responder Historial",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mapear Stock": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Responder Stock",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mapeo Carga Ventas": {
+      "main": [
+        []
+      ]
+    },
+    "Normalizacion Webhook Compras": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Ficha stock",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Recibir formulario": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Switch",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Reconstruccion de Compra": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Historial Compra",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Stock Existente?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Existe Stock?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Estandares matariales",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Leer Historial",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Leer Stock",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Normalizacion Webhook Compras",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "normalizar pedido",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Leer Estados de Pedidos",
+            "type": "main"
+          },
+          {
+            "node": "Leer Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Leer clientes",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": " Crear Cliente",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "node": "Actualizar Estado Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Actualizar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Reconstruccion de Compra",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "actualizar items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualizar pedidos": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Leer BOM venta",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "enviar estandares": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Responder Estandares",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "mapear estandares": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "enviar estandares",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "normalizar pedido": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Decision venta",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Resolver BOM del pedido": {
+      "main": [
+        [
+          {
+            "node": "Mapeo Carga Ventas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Historial Venta": {
+      "main": [
+        [
+          {
+            "node": "Responder pedido OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Leer stock para venta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Items": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Mapear Estado de Pedidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Estado Pedido": {
+      "main": [
+        [
+          {
+            "node": "Responder Estado de Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Cliente Actualizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Resolver BOM del pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer stock para venta": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Actualizar Faltantes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Actualizar Errores de Catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Stock Existente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapeo de carga de stock": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Errores de Catalogo": {
+      "main": [
+        [
+          {
+            "node": "Responder Fatlantes Catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Faltantes": {
+      "main": [
+        [
+          {
+            "node": "Responder faltantes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2fca1ff7-fd06-4f57-8ed9-366680214a68",
+  "activeVersionId": null,
+  "versionCounter": 1053,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-04T23:41:20.252Z",
+      "createdAt": "2026-04-04T23:41:20.252Z",
+      "role": "workflow:owner",
+      "workflowId": "7ntDbXur9JBetv23",
+      "projectId": "s9IGYz1csfqkOvid",
+      "project": {
+        "updatedAt": "2026-03-30T02:01:12.163Z",
+        "createdAt": "2026-03-30T02:01:05.942Z",
+        "id": "s9IGYz1csfqkOvid",
+        "name": "Joaquin Gonzalez <holaj3415@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "41315c07-4ebe-4d23-a951-df415cb7044a"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

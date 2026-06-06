@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fontana - Control de Stock</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- PIN overlay -->
+  <div id="pin-overlay" class="overlay">
+    <div class="overlay-card">
+      <h2>Acceso al Sistema</h2>
+      <p>Ingrese su PIN para continuar</p>
+      <input type="password" id="pin-input" class="input" placeholder="PIN" maxlength="10" inputmode="numeric" autocomplete="off" />
+      <button id="pin-submit" class="btn btn-primary btn-block">Ingresar</button>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div id="app" class="hidden">
+    <header>
+      <div class="header-content">
+        <h1>Fontana</h1>
+        <p class="subtitle">Control de Stock</p>
+        <nav class="header-nav">
+          <a href="clientes.html" class="btn btn-sm btn-outline">&#128100; Clientes</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Menu principal -->
+      <div id="menu-section">
+        <div class="menu-grid">
+          <button class="menu-card" data-action="registrar_compra">
+            <div class="menu-icon-wrap"><div class="menu-icon">&#128230;</div></div>
+            <span class="menu-label">Registrar Compra</span>
+            <span class="menu-desc">Ingresar mercaderia al stock</span>
+          </button>
+          <button class="menu-card" data-action="stock">
+            <div class="menu-icon-wrap"><div class="menu-icon">&#128200;</div></div>
+            <span class="menu-label">Consultar Stock</span>
+            <span class="menu-desc">Ver inventario completo</span>
+          </button>
+          <button class="menu-card" data-action="consultar_alertas">
+            <div class="menu-icon-wrap"><div class="menu-icon">&#9888;</div></div>
+            <span class="menu-label">Ver Alertas</span>
+            <span class="menu-desc">Productos con stock bajo</span>
+          </button>
+          <button class="menu-card" data-action="historial">
+            <div class="menu-icon-wrap"><div class="menu-icon">&#128220;</div></div>
+            <span class="menu-label">Historial</span>
+            <span class="menu-desc">Movimientos recientes</span>
+          </button>
+          <button class="menu-card" data-action="estandares">
+            <div class="menu-icon-wrap"><div class="menu-icon">&#128295;</div></div>
+            <span class="menu-label">Estandares BOM</span>
+            <span class="menu-desc">Materiales por tipo de mueble</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Registrar Compra -->
+      <div id="section-registrar_compra" class="section hidden">
+        <div class="section-header">
+          <button class="btn-back" id="back-compra">&larr; Volver</button>
+          <h2>Registrar Compra</h2>
+        </div>
+        <form id="form-compra" class="card" novalidate>
+          <div class="form-group">
+            <label>Producto</label>
+            <div class="searchable-select" id="ss-compra-producto">
+              <input type="text" class="input ss-input" placeholder="Buscar producto..." autocomplete="off" />
+              <input type="hidden" id="compra-producto" />
+              <div class="ss-dropdown"></div>
+            </div>
+            <span class="field-error"></span>
+          </div>
+          <div class="form-group">
+            <label>Color / Variante</label>
+            <div class="searchable-select" id="ss-compra-color">
+              <input type="text" class="input ss-input" placeholder="Buscar color/variante..." autocomplete="off" />
+              <input type="hidden" id="compra-color" />
+              <div class="ss-dropdown"></div>
+            </div>
+            <span class="field-error"></span>
+          </div>
+          <div class="form-group">
+            <label>Medida</label>
+            <div class="searchable-select" id="ss-compra-medida">
+              <input type="text" class="input ss-input" placeholder="Buscar medida..." autocomplete="off" />
+              <input type="hidden" id="compra-medida" />
+              <div class="ss-dropdown"></div>
+            </div>
+            <span class="field-error"></span>
+          </div>
+          <div class="form-group" id="fg-compra-categoria">
+            <label>Categoría</label>
+            <div class="searchable-select" id="ss-compra-categoria">
+              <input type="text" class="input ss-input" placeholder="Buscar categoria..." autocomplete="off" />
+              <input type="hidden" id="compra-categoria" />
+              <div class="ss-dropdown"></div>
+            </div>
+            <span class="field-error"></span>
+          </div>
+          <input type="hidden" id="compra-codigo" />
+          <div class="form-group">
+            <label for="compra-cantidad">Cantidad</label>
+            <input type="text" id="compra-cantidad" class="input" placeholder="Ej: 10" inputmode="numeric" required />
+            <span class="field-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="compra-precio">Precio por unidad ($)</label>
+            <input type="text" id="compra-precio" class="input" placeholder="Ej: 1.500,50" inputmode="decimal" required />
+            <span class="field-error"></span>
+          </div>
+          <div class="form-group">
+            <label>Proveedor</label>
+            <div class="searchable-select" id="ss-compra-proveedor">
+              <input type="text" class="input ss-input" placeholder="Buscar proveedor..." autocomplete="off" />
+              <input type="hidden" id="compra-proveedor" />
+              <div class="ss-dropdown"></div>
+            </div>
+            <span class="field-error"></span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Confirmar Compra</button>
+        </form>
+
+        <!-- Confirmation modal -->
+        <div id="confirm-compra" class="modal hidden">
+          <div class="modal-backdrop"></div>
+          <div class="modal-content card">
+            <h3>Confirmar Compra</h3>
+            <div id="confirm-compra-body" class="confirm-summary"></div>
+            <div class="modal-actions">
+              <button id="confirm-compra-cancel" class="btn btn-outline">Cancelar</button>
+              <button id="confirm-compra-ok" class="btn btn-primary">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock -->
+      <div id="section-stock" class="section hidden">
+        <div class="section-header">
+          <button class="btn-back" id="back-stock">&larr; Volver</button>
+          <h2>Consultar Stock</h2>
+        </div>
+        <div class="stk-summary card">
+          <div class="stk-stat">
+            <span class="stk-stat-value" id="stk-count">-</span>
+            <span class="stk-stat-label">Productos</span>
+          </div>
+          <div class="stk-stat">
+            <span class="stk-stat-value" id="stk-units">-</span>
+            <span class="stk-stat-label">Unidades</span>
+          </div>
+          <div class="stk-stat">
+            <span class="stk-stat-value" id="stk-value">-</span>
+            <span class="stk-stat-label">Valor stock</span>
+          </div>
+        </div>
+
+        <div class="stk-filters card">
+          <div class="stk-filter-row">
+            <input type="text" id="stk-search" class="input input-sm" placeholder="Buscar codigo, producto, marca..." />
+          </div>
+          <div class="stk-filter-row">
+            <select id="stk-hoja-filter" class="input input-sm">
+              <option value="">Todas las hojas</option>
+            </select>
+            <select id="stk-seccion-filter" class="input input-sm">
+              <option value="">Todas las secciones</option>
+            </select>
+            <select id="stk-cat-filter" class="input input-sm">
+              <option value="">Todas las categorias</option>
+            </select>
+            <select id="stk-marca-filter" class="input input-sm">
+              <option value="">Todas las marcas</option>
+            </select>
+            <select id="stk-reponer-filter" class="input input-sm">
+              <option value="">Todos</option>
+              <option value="si">Solo a reponer</option>
+              <option value="no">Solo con stock OK</option>
+            </select>
+            <button class="btn btn-sm btn-outline" id="stk-refresh-btn">Recargar</button>
+          </div>
+        </div>
+
+        <div id="stk-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Cargando stock...</p>
+        </div>
+
+        <div id="stk-table-wrap" class="stk-table-wrap hidden">
+          <table class="stk-table" id="stk-table">
+            <thead>
+              <tr>
+                <th data-col="hoja_origen">Hoja Origen</th>
+                <th data-col="seccion">Seccion</th>
+                <th data-col="producto">Producto</th>
+                <th data-col="categoria">Categoria</th>
+                <th data-col="color_variante">Color / Variante</th>
+                <th data-col="marca">Marca</th>
+                <th data-col="medida">Medida</th>
+                <th data-col="codigo">Codigo</th>
+                <th data-col="precio_unit">Precio Unit.</th>
+                <th data-col="stock_actual">Stock Actual</th>
+                <th data-col="stock_min">Stock Min.</th>
+                <th data-col="precio_total">Precio Total</th>
+                <th data-col="reponer">Reponer</th>
+              </tr>
+            </thead>
+            <tbody id="stk-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Ver Alertas -->
+      <div id="section-consultar_alertas" class="section hidden">
+        <div class="section-header">
+          <button class="btn-back" id="back-alertas">&larr; Volver</button>
+          <h2>Alertas de Stock</h2>
+        </div>
+        <div id="alertas-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Consultando alertas...</p>
+        </div>
+        <div id="alertas-results" class="card hidden"></div>
+      </div>
+
+      <!-- Historial de Movimientos -->
+      <div id="section-historial" class="section hidden">
+        <div class="section-header">
+          <button class="btn-back" id="back-historial">&larr; Volver</button>
+          <h2>Historial de Movimientos</h2>
+        </div>
+
+        <!-- Resumen rapido -->
+        <div class="hist-summary card" id="hist-summary">
+          <div class="hist-stat">
+            <span class="hist-stat-value" id="hist-total-hoy">-</span>
+            <span class="hist-stat-label">Hoy</span>
+          </div>
+          <div class="hist-stat">
+            <span class="hist-stat-value hist-compra" id="hist-ultima-compra">-</span>
+            <span class="hist-stat-label">Ult. compra</span>
+          </div>
+          <div class="hist-stat">
+            <span class="hist-stat-value hist-venta" id="hist-ultima-venta">-</span>
+            <span class="hist-stat-label">Ult. venta</span>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="hist-filters card">
+          <div class="hist-filter-row">
+            <select id="hist-tipo" class="input input-sm">
+              <option value="">Todos</option>
+              <option value="COMPRA">Compras</option>
+              <option value="VENTA">Ventas</option>
+            </select>
+            <input type="text" id="hist-buscar" class="input input-sm" placeholder="Buscar codigo o producto..." />
+          </div>
+          <div class="hist-filter-row">
+            <input type="date" id="hist-desde" class="input input-sm" />
+            <input type="date" id="hist-hasta" class="input input-sm" />
+            <button class="btn btn-sm btn-primary" id="hist-filtrar-btn">Filtrar</button>
+          </div>
+          <div class="hist-filter-actions">
+            <button class="btn btn-sm btn-outline" id="hist-export-btn">Exportar CSV</button>
+          </div>
+        </div>
+
+        <div id="hist-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Cargando movimientos...</p>
+        </div>
+        <div id="hist-results"></div>
+        <div id="hist-paginacion" class="hist-pag hidden"></div>
+      </div>
+
+      <!-- Gestion de Estandares BOM -->
+      <div id="section-estandares" class="section hidden">
+        <div class="section-header">
+          <button class="btn-back" id="back-estandares">&larr; Volver</button>
+          <h2>Estandares BOM</h2>
+        </div>
+
+        <!-- Vista lista -->
+        <div id="est-lista-view">
+          <div class="est-top-bar">
+            <input type="text" id="est-buscar" class="input input-sm" placeholder="Buscar estandar..." />
+            <button class="btn btn-sm btn-primary" id="est-nuevo-btn">+ Nuevo</button>
+          </div>
+          <div id="est-loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Cargando estandares...</p>
+          </div>
+          <div id="est-lista"></div>
+        </div>
+
+        <!-- Vista edicion -->
+        <div id="est-edit-view" class="hidden">
+          <div class="est-edit-header">
+            <button class="btn-back" id="est-back-lista">&larr; Volver a lista</button>
+            <h3 id="est-edit-title">Nuevo Estandar</h3>
+          </div>
+          <form id="form-estandar" class="card" novalidate>
+            <div class="form-group">
+              <label for="est-tipo-mueble">Identificador (tipo_mueble)</label>
+              <input type="text" id="est-tipo-mueble" class="input" placeholder="Ej: alacena_1m" required />
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="est-nombre">Nombre para mostrar</label>
+              <input type="text" id="est-nombre" class="input" placeholder="Ej: Alacena 1 metro" required />
+              <span class="field-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="est-descripcion">Descripcion</label>
+              <input type="text" id="est-descripcion" class="input" placeholder="Ej: Modulo alacena estandar 100x60x30cm" />
+            </div>
+
+            <h4 class="est-mat-title">Materiales</h4>
+            <div id="est-materiales-list"></div>
+            <button type="button" class="btn btn-sm btn-outline est-add-mat-btn" id="est-add-material">+ Agregar material</button>
+
+            <div class="est-form-actions">
+              <button type="button" class="btn btn-outline" id="est-cancel-btn">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+          </form>
+
+          <!-- Simulador -->
+          <div class="card est-sim-card">
+            <h4>Simulador de venta</h4>
+            <div class="est-sim-row">
+              <input type="text" id="est-sim-color" class="input input-sm" placeholder="Color" />
+              <input type="number" id="est-sim-cantidad" class="input input-sm" placeholder="Cant." min="1" value="1" />
+              <button type="button" class="btn btn-sm btn-primary" id="est-sim-btn">Simular</button>
+            </div>
+            <div id="est-sim-result"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

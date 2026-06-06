@@ -1,0 +1,432 @@
+{
+  "id": "7ntDbXur9JBetv23",
+  "name": "Fontana — Formulario web webhook",
+  "active": false,
+  "versionId": "2fca1ff7-fd06-4f57-8ed9-366680214a68",
+  "nodeCount": 72,
+  "triggerCount": 0,
+  "triggerNodes": [],
+  "externalServices": [
+    "Google",
+    "Google Sheets",
+    "Webhook"
+  ],
+  "nodeNames": [
+    "Recibir formulario",
+    "Nota: Entrada web",
+    "Nota: Compra web",
+    "Normalizacion Webhook Compras",
+    "Stock Existente?",
+    "Ficha stock",
+    "Update row in sheet",
+    "Responder compra OK",
+    "Leer BOM venta",
+    "Resolver BOM del pedido",
+    "Responder faltantes",
+    "Nota: Ejecucion Venta",
+    "Mapear Stock",
+    "Responder Stock",
+    "Nota: Consultar Stock",
+    "Leer Historial",
+    "Mapear Historial",
+    "Responder Historial",
+    "Historial Compra",
+    "Nota: Historial",
+    "Sticky Note1",
+    "Switch",
+    "Sticky Note2",
+    "Existe Stock?",
+    "Sticky Note3",
+    "Reconstruccion de Compra",
+    "Mapeo Carga Ventas",
+    "Nota: Historial1",
+    "Estandares matariales",
+    "Responder Estandares",
+    "mapear estandares",
+    "enviar estandares",
+    "Sticky Note4",
+    "Sticky Note5",
+    "Sticky Note6",
+    "Leer clientes",
+    "Mapear Clientes",
+    "Responder Clientes",
+    "Sticky Note7",
+    "Leer Estados de Pedidos",
+    "Mapear Estado de Pedidos",
+    "Responder Estado de Pedidos",
+    "Sticky Note8",
+    "Cliente Creado",
+    " Crear Cliente",
+    "normalizar pedido",
+    "actualizar pedidos",
+    "actualizar items",
+    "Respond to Webhook",
+    "Decision venta",
+    "Leer Stock",
+    "Responder pedido OK",
+    "Historial Venta",
+    "Aggregate",
+    "Sticky Note",
+    "Leer Items",
+    "Merge",
+    "Sticky Note9",
+    "Actualizar Estado Pedido",
+    "Actualizar Cliente",
+    "Responder Estado de Items",
+    "Cliente Actualizado",
+    "Merge1",
+    "Leer stock para venta",
+    "Filter",
+    "Switch1",
+    "Responder Fatlantes Catalogo",
+    "No Existe Stock",
+    "Filter1",
+    "Mapeo de carga de stock",
+    "Actualizar Errores de Catalogo",
+    "Actualizar Faltantes"
+  ],
+  "nodeTypes": [
+    "n8n-nodes-base.aggregate",
+    "n8n-nodes-base.code",
+    "n8n-nodes-base.filter",
+    "n8n-nodes-base.googleSheets",
+    "n8n-nodes-base.if",
+    "n8n-nodes-base.merge",
+    "n8n-nodes-base.respondToWebhook",
+    "n8n-nodes-base.stickyNote",
+    "n8n-nodes-base.switch",
+    "n8n-nodes-base.webhook"
+  ],
+  "connections": [
+    {
+      "from": " Crear Cliente",
+      "to": "Cliente Creado",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Actualizar Cliente",
+      "to": "Cliente Actualizado",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Actualizar Errores de Catalogo",
+      "to": "Responder Fatlantes Catalogo",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Actualizar Estado Pedido",
+      "to": "Responder Estado de Items",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Actualizar Faltantes",
+      "to": "Responder faltantes",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Aggregate",
+      "to": "Leer stock para venta",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Decision venta",
+      "to": "actualizar pedidos",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Decision venta",
+      "to": "actualizar items",
+      "type": "main",
+      "outputIndex": 1
+    },
+    {
+      "from": "Decision venta",
+      "to": "Respond to Webhook",
+      "type": "main",
+      "outputIndex": 2
+    },
+    {
+      "from": "Estandares matariales",
+      "to": "mapear estandares",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Existe Stock?",
+      "to": "Mapeo de carga de stock",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Existe Stock?",
+      "to": "No Existe Stock",
+      "type": "main",
+      "outputIndex": 1
+    },
+    {
+      "from": "Ficha stock",
+      "to": "Filter1",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Filter",
+      "to": "Merge1",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Filter1",
+      "to": "Stock Existente?",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Historial Compra",
+      "to": "Responder compra OK",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Historial Venta",
+      "to": "Responder pedido OK",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer BOM venta",
+      "to": "Merge1",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer Estados de Pedidos",
+      "to": "Merge",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer Historial",
+      "to": "Mapear Historial",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer Items",
+      "to": "Merge",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer Stock",
+      "to": "Mapear Stock",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer clientes",
+      "to": "Mapear Clientes",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Leer stock para venta",
+      "to": "Filter",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Mapear Clientes",
+      "to": "Responder Clientes",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Mapear Estado de Pedidos",
+      "to": "Responder Estado de Pedidos",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Mapear Historial",
+      "to": "Responder Historial",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Mapear Stock",
+      "to": "Responder Stock",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Mapeo de carga de stock",
+      "to": "Update row in sheet",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Merge",
+      "to": "Mapear Estado de Pedidos",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Merge1",
+      "to": "Resolver BOM del pedido",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Normalizacion Webhook Compras",
+      "to": "Ficha stock",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Recibir formulario",
+      "to": "Switch",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Reconstruccion de Compra",
+      "to": "Historial Compra",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Resolver BOM del pedido",
+      "to": "Mapeo Carga Ventas",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Stock Existente?",
+      "to": "Existe Stock?",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Switch",
+      "to": "Estandares matariales",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "Switch",
+      "to": "Leer Historial",
+      "type": "main",
+      "outputIndex": 1
+    },
+    {
+      "from": "Switch",
+      "to": "Leer Stock",
+      "type": "main",
+      "outputIndex": 2
+    },
+    {
+      "from": "Switch",
+      "to": "Normalizacion Webhook Compras",
+      "type": "main",
+      "outputIndex": 3
+    },
+    {
+      "from": "Switch",
+      "to": "normalizar pedido",
+      "type": "main",
+      "outputIndex": 4
+    },
+    {
+      "from": "Switch",
+      "to": "Leer Estados de Pedidos",
+      "type": "main",
+      "outputIndex": 5
+    },
+    {
+      "from": "Switch",
+      "to": "Leer Items",
+      "type": "main",
+      "outputIndex": 5
+    },
+    {
+      "from": "Switch",
+      "to": "Leer clientes",
+      "type": "main",
+      "outputIndex": 6
+    },
+    {
+      "from": "Switch",
+      "to": " Crear Cliente",
+      "type": "main",
+      "outputIndex": 7
+    },
+    {
+      "from": "Switch",
+      "to": "Actualizar Estado Pedido",
+      "type": "main",
+      "outputIndex": 8
+    },
+    {
+      "from": "Switch",
+      "to": "Actualizar Cliente",
+      "type": "main",
+      "outputIndex": 9
+    },
+    {
+      "from": "Switch1",
+      "to": "Actualizar Faltantes",
+      "type": "main",
+      "outputIndex": 1
+    },
+    {
+      "from": "Switch1",
+      "to": "Actualizar Errores de Catalogo",
+      "type": "main",
+      "outputIndex": 2
+    },
+    {
+      "from": "Update row in sheet",
+      "to": "Reconstruccion de Compra",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "actualizar items",
+      "to": "Aggregate",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "actualizar pedidos",
+      "to": "Leer BOM venta",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "enviar estandares",
+      "to": "Responder Estandares",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "mapear estandares",
+      "to": "enviar estandares",
+      "type": "main",
+      "outputIndex": 0
+    },
+    {
+      "from": "normalizar pedido",
+      "to": "Decision venta",
+      "type": "main",
+      "outputIndex": 0
+    }
+  ]
+}
