@@ -1,0 +1,10 @@
+# Configuración de Netlify para este repo.
+# La app es estática y vive en web-form/ (no en la raíz del repo).
+# Con esto, al conectar el repo a Netlify se publica la carpeta correcta sola.
+#
+# La home (index.html) es el módulo Stock; la app de Clientes & Proyectos
+# queda en /clientes (Netlify sirve clientes.html con "pretty URLs").
+
+[build]
+  publish = "web-form"
+  command = ""
