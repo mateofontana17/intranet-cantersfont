@@ -43,7 +43,12 @@
  * }
  */
 
-const WEBHOOK_URL = 'https://joaquingonzalezmenza.app.n8n.cloud/webhook/fontana-stock-form';
+// URL de producción (n8n cloud del dev). Para probar contra un n8n local sin tocar
+// este archivo, en la consola del navegador correr:
+//   localStorage.setItem('fontana_webhook_override', 'http://localhost:5678/webhook/fontana-stock-form')
+// y para volver a producción: localStorage.removeItem('fontana_webhook_override')
+const WEBHOOK_URL = (typeof localStorage !== 'undefined' && localStorage.getItem('fontana_webhook_override'))
+  || 'https://joaquingonzalezmenza.app.n8n.cloud/webhook/fontana-stock-form';
 
 // ---- DOM helpers ----
 const $ = (sel) => document.querySelector(sel);

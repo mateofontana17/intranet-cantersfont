@@ -568,5 +568,61 @@ oculta si saldo no cobrado. Sin errores en consola.
 
 ---
 
+## Sesión 2026-06-12 — Backend Fase 0: persistencia compartida de la ficha
+
+### Cambio 12 — Acción `guardar_proyecto_detalle` en n8n (Etapas 2-5 reales)
+
+**Qué se cambió:** se implementó la "Fase 0" del backend (la que faltaba para que
+la ficha deje de guardar solo en el navegador). El frontend ya mandaba la acción
+`guardar_proyecto_detalle` ([clientes.js](../web-form/clientes.js)); ahora el
+workflow de n8n la atiende y persiste todo el bloque JSON en la hoja.
+
+**Código:**
+- `scripts/patch-guardar-proyecto-detalle.js` (nuevo, idempotente) parchea
+  `workflows/clean/formulario-webhook.json`:
+  - **Switch:** nueva regla (salida 13) para `action == guardar_proyecto_detalle`.
+  - **Parsear Detalle Proyecto** (Code): valida `proyecto_id`, toma `data.detalle`
+    como string JSON tal cual.
+  - **Guardar Detalle Proyecto** (Google Sheets `update`): matchea por
+    `proyecto_id` y pisa **solo** la columna `detalle` (no toca los campos de
+    Etapa 1). Hoja `Estado de Pedidos` (gid 440974926).
+  - **Responder Detalle OK** (Respond): `{ ok: true, proyecto_id }`.
+  - **Mapear Estado de Pedidos:** ahora incluye `detalle: norm(r.detalle)` para que
+    `listar_pedidos` lo devuelva y la ficha rehidrate desde el servidor.
+
+**Paso manual pendiente (no automatizable):** agregar en la hoja
+`Estado de Pedidos` una columna al final con el encabezado `detalle`.
+
+**Razonamiento:** se eligió el enfoque "un bloque JSON en una columna" (Opción A) —
+mismo criterio que `docs/backend-ficha-proyecto.md` y que la "Fase 0" del plan del
+desarrollador. Con esto, agregar/cambiar campos de las Etapas 2-5 vuelve a ser 100%
+frontend. Se mantuvo la consistencia con `Parsear Proyecto` (sin validación de PIN,
+mismo patrón `$json.body || $json`).
+
+**Flujo de trabajo nuevo:** los workflows se construyen/prueban en un n8n local,
+se exportan a `workflows/clean/` (versionado) y el desarrollador los importa en su
+servidor pago (re-vinculando credenciales, que no viajan en el JSON).
+
+**VERIFICADO punta a punta (2026-06-16)** contra n8n local (v2.25.7) + la planilla
+real, vía `curl` al webhook:
+- `listar_pedidos` devuelve el campo `detalle`. ✅
+- `guardar_proyecto_detalle` responde `{ok:true,proyecto_id}` y el JSON queda
+  persistido en la celda `detalle`; al releer, vuelve. ✅
+
+**Nodo "Guardar Detalle Proyecto" usa `autoMapInputData`** (no `defineBelow`): mapea
+los campos de entrada (`proyecto_id`, `detalle`) a sus columnas por nombre. Se eligió
+así porque el mapeo manual se **borra si se toca "refrescar columnas" en la UI** de
+n8n (nos pasó en la prueba). autoMap sobrevive a eso.
+
+**Notas para el deploy en el servidor del dev (importar el JSON):**
+1. Re-vincular la credencial de Google Sheets en los nodos (no viaja en el JSON).
+2. La hoja `Estado de Pedidos` debe tener la columna `detalle` (encabezado exacto,
+   minúscula). La posición de la columna no importa (n8n mapea por nombre).
+3. n8n self-hosted necesita un client OAuth propio de Google Cloud con el redirect
+   `…/rest/oauth2-credential/callback` y la cuenta como *test user*; y habilitar
+   Google Sheets API + Google Drive API.
+
+---
+
 <!-- Próximos cambios se agregan ACÁ abajo, numerados, con la misma estructura:
      Qué se cambió / Código / Razonamiento / Cómo seguimos. -->

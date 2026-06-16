@@ -867,6 +867,31 @@
               },
               "renameOutput": true,
               "outputKey": "Alertas"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cond-guardar-detalle",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "guardar_proyecto_detalle",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Guardar Detalle Proyecto"
             }
           ]
         },
@@ -1208,7 +1233,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Mapea proyectos (Estado de Pedidos) — cliente vinculado\nconst items = $input.all().map(i => i.json);\nconst norm = (v) => (v == null ? '' : (typeof v === 'string' ? v.trim() : v));\nreturn items\n  .filter(r => norm(r.proyecto_id) || norm(r.cliente_nombre))\n  .map(r => ({ json: {\n    proyecto_id: norm(r.proyecto_id),\n    fecha_alta: norm(r.fecha_alta),\n    estado: norm(r.estado) || 'en_ventas',\n    cliente_id: norm(r.cliente_id),\n    cliente_nombre: norm(r.cliente_nombre),\n    direccion_colocacion: norm(r.direccion_colocacion),\n    clasificacion_cliente: norm(r.clasificacion_cliente),\n    como_nos_conocio: norm(r.como_nos_conocio),\n    espacios: norm(r.espacios),\n    que_te_dijo: norm(r.que_te_dijo),\n    fecha_tentativa: norm(r.fecha_tentativa),\n    notas: norm(r.notas),\n    vendedor: norm(r.vendedor),\n  }}));"
+        "jsCode": "// Mapea proyectos (Estado de Pedidos) — cliente vinculado\nconst items = $input.all().map(i => i.json);\nconst norm = (v) => (v == null ? '' : (typeof v === 'string' ? v.trim() : v));\nreturn items\n  .filter(r => norm(r.proyecto_id) || norm(r.cliente_nombre))\n  .map(r => ({ json: {\n    proyecto_id: norm(r.proyecto_id),\n    fecha_alta: norm(r.fecha_alta),\n    estado: norm(r.estado) || 'en_ventas',\n    cliente_id: norm(r.cliente_id),\n    cliente_nombre: norm(r.cliente_nombre),\n    direccion_colocacion: norm(r.direccion_colocacion),\n    clasificacion_cliente: norm(r.clasificacion_cliente),\n    como_nos_conocio: norm(r.como_nos_conocio),\n    espacios: norm(r.espacios),\n    que_te_dijo: norm(r.que_te_dijo),\n    fecha_tentativa: norm(r.fecha_tentativa),\n    notas: norm(r.notas),\n    vendedor: norm(r.vendedor),\n    detalle: norm(r.detalle),\n  }}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -3779,6 +3804,94 @@
       "typeVersion": 1,
       "id": "dc776108-fe26-45a5-87db-798652d06e17",
       "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fase 0 — guardar Etapas 2-5 como bloque JSON en la columna `detalle`\nconst body = $json.body || $json;\nconst data = body.data || {};\nconst limpiar = s => (typeof s === 'string' ? s.trim() : (s == null ? '' : String(s)));\n\nconst proyecto_id = limpiar(data.proyecto_id);\nif (!proyecto_id) throw new Error('Falta proyecto_id');\n\n// `detalle` ya viene como string JSON desde el frontend; se guarda tal cual.\nlet detalle = data.detalle;\nif (detalle == null) detalle = '';\nif (typeof detalle !== 'string') detalle = JSON.stringify(detalle);\n\nreturn [{ json: { proyecto_id, detalle } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        2880
+      ],
+      "id": "parsear-detalle-proyecto",
+      "name": "Parsear Detalle Proyecto"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qKDeWUli8N5wVxoPx89yF9nVnq3_jdyIpJP7g_gVcOQ",
+          "mode": "list",
+          "cachedResultName": "Materiales, Stock y Clientes demo"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 440974926,
+          "mode": "list",
+          "cachedResultName": "Estado de Pedidos"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "proyecto_id"
+          ],
+          "schema": [
+            {
+              "id": "proyecto_id",
+              "displayName": "proyecto_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        220,
+        2880
+      ],
+      "id": "guardar-detalle-update",
+      "name": "Guardar Detalle Proyecto",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LiTV16yWQFogsvNY",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, proyecto_id: $('Parsear Detalle Proyecto').first().json.proyecto_id }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        2880
+      ],
+      "id": "resp-detalle-ok",
+      "name": "Responder Detalle OK"
     }
   ],
   "connections": {
@@ -4230,6 +4343,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Parsear Detalle Proyecto",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -4488,6 +4608,28 @@
         [
           {
             "node": "Responder Proyecto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Detalle Proyecto": {
+      "main": [
+        [
+          {
+            "node": "Guardar Detalle Proyecto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Detalle Proyecto": {
+      "main": [
+        [
+          {
+            "node": "Responder Detalle OK",
             "type": "main",
             "index": 0
           }
