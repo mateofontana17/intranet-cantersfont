@@ -624,5 +624,46 @@ n8n (nos pasó en la prueba). autoMap sobrevive a eso.
 
 ---
 
+## Sesión 2026-06-16 — Subida real de archivos
+
+### Cambio 13 — Subir archivos desde el formulario (acción `subir_archivo`)
+
+**Qué se cambió:** los campos de archivo (fotos, planos, bocetos, contratos,
+comprobantes, conformidad) dejan de ser sólo "pegar link": ahora se puede **elegir
+el archivo y se sube solo a Google Drive**, guardándose el link resultante.
+
+**Código:**
+- `web-form/clientes.js`:
+  - Tipos de campo nuevos **`archivo`** (single) y **`archivolist`** (múltiple) —
+    render, lectura (`readCampos`), validación (`valorVacio`) y binding (`bindArchivos`).
+  - `fileToPayload()` comprime imágenes (canvas, máx 1600px, JPEG 0.82) y las pasa a
+    base64; `handleArchivoUpload()` manda `subir_archivo` al webhook y escribe el link
+    devuelto en el input de la fila. El valor guardado sigue siendo el link, así que
+    `guardarEtapa` no cambia.
+  - 10 campos migrados de `url`/`linklist` → `archivo`/`archivolist` (Etapas 2, 3A,
+    3B, 4, 5A, 5C). `link_render` y `link_planos` quedan como `url` (son links a
+    carpetas/renders, no uploads).
+- `web-form/styles.css`: estilos de los campos de archivo + estados (subiendo/ok/error).
+- `scripts/patch-subir-archivo.js` (nuevo, idempotente): agrega al workflow la rama
+  `subir_archivo` → `Parsear Archivo` (Code: base64→binario con
+  `this.helpers.prepareBinaryData`) → `Subir Archivo a Drive` (Google Drive upload) →
+  `Responder Archivo OK` (`{ok:true, link}`).
+
+**Razonamiento:** subir de a un archivo por request (con compresión client-side)
+mantiene el payload chico y evita el límite del webhook; el almacenamiento sigue
+siendo un link de Drive, así que el bloque JSON `detalle` no engorda y el guardado de
+la ficha (Cambio 12) no cambia. El campo `archivo` también acepta pegar un link, como
+fallback para archivos grandes.
+
+**VERIFICADO (2026-06-16)** contra n8n local + Drive real:
+- `subir_archivo` sube el archivo y devuelve el link de Drive. ✅
+- Flujo completo: subir → guardar el link en `etapa2.fotos` → recargar → persiste. ✅
+- Frontend: render de `archivo`/`archivolist` OK, sin errores en consola, funciones
+  presentes (probado en preview localhost:4600).
+
+**Deploy:** instrucciones completas para producción en `docs/deploy-joaco.md`.
+
+---
+
 <!-- Próximos cambios se agregan ACÁ abajo, numerados, con la misma estructura:
      Qué se cambió / Código / Razonamiento / Cómo seguimos. -->

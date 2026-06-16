@@ -792,8 +792,8 @@ const FICHA_ETAPAS = [
       { key: 'tipo_piso', label: 'Tipo de piso', tipo: 'select', opciones: ['Cerámico', 'Madera', 'Flotante', 'Cemento alisado', 'Otro'], hint: 'Afecta zócalos y nivelación' },
       { key: 'instalaciones', label: 'Instalaciones existentes', tipo: 'multiselect', requerido: true, opciones: ['Gas', '220V', '380V', 'Agua', 'Desagüe', 'Campana extracción'] },
       { key: 'estado_lugar', label: 'Estado general del lugar', tipo: 'select', requerido: true, opciones: ['Listo para colocar', 'En obra', 'Por terminar'] },
-      { key: 'fotos', label: 'Fotos del lugar (links)', tipo: 'linklist', requerido: true, min: 3, hint: 'Mínimo 3: frente, lateral y accesos. Pegá los links de Drive/fotos.' },
-      { key: 'plano', label: 'Plano del lugar (link)', tipo: 'url', placeholder: 'Link al PDF/imagen del plano (opcional)' },
+      { key: 'fotos', label: 'Fotos del lugar', tipo: 'archivolist', requerido: true, min: 3, hint: 'Mínimo 3: frente, lateral y accesos. Subí las fotos o pegá links.' },
+      { key: 'plano', label: 'Plano del lugar', tipo: 'archivo', placeholder: 'Subí el PDF/imagen del plano o pegá un link (opcional)' },
       { key: 'notas_relevamiento', label: 'Notas del relevamiento', tipo: 'textarea', placeholder: 'Humedad, columnas, ausencias del cliente, etc.' },
     ],
   },
@@ -805,7 +805,7 @@ const FICHA_ETAPAS = [
       { key: 'descripcion_diseno', label: 'Descripción del diseño', tipo: 'textarea', requerido: true, placeholder: 'Estilo, colores generales, idea. Ej: "Cocina en L blanca con isla, alacenas hasta el techo, mesada de cuarzo negro"' },
       { key: 'link_render', label: 'Link al render', tipo: 'url', requerido: true, placeholder: 'Link de Drive / Dropbox', hint: 'V2 será upload directo' },
       { key: 'link_planos', label: 'Link a planos técnicos', tipo: 'url', placeholder: 'Planos del arquitecto o del diseñador interno (opcional)' },
-      { key: 'boceto_aprobado', label: 'Boceto aprobado por el cliente (link)', tipo: 'url', requerido: true, hint: 'El documento que el cliente firma — referencia anti "yo no pedí eso"' },
+      { key: 'boceto_aprobado', label: 'Boceto aprobado por el cliente', tipo: 'archivo', requerido: true, hint: 'El documento que el cliente firma — referencia anti "yo no pedí eso". Subí el archivo o pegá un link.' },
       { key: 'fecha_aprobacion', label: 'Fecha de aprobación del diseño', tipo: 'date', requerido: true, hint: 'Dispara el pase a Producción' },
     ],
   },
@@ -837,8 +837,8 @@ const FICHA_ETAPAS = [
       { key: 'desc_led', label: 'Cómo va el LED', tipo: 'textarea', requerido: true, placeholder: 'Dónde va, color (cálido/frío), si es regulable', dependeDe: { campo: 'lleva_led', valor: 'Sí' } },
       { key: 'tipo_herraje', label: 'Tipo de herraje', tipo: 'select', requerido: true, opciones: ['Cierre suave', 'Cierre común', 'Push', 'Bisagras ocultas'] },
       { key: 'caracteristicas', label: 'Características adicionales', tipo: 'textarea', placeholder: 'Divisiones internas, vidrios, especiales' },
-      { key: 'boceto', label: 'Boceto del mueble (link)', tipo: 'url', requerido: true, placeholder: 'Link a la imagen del boceto' },
-      { key: 'croquis', label: 'Croquis técnico (link)', tipo: 'url', requerido: true, placeholder: 'Link al croquis con medidas para producción' },
+      { key: 'boceto', label: 'Boceto del mueble', tipo: 'archivo', requerido: true, placeholder: 'Subí la imagen del boceto o pegá un link' },
+      { key: 'croquis', label: 'Croquis técnico', tipo: 'archivo', requerido: true, placeholder: 'Subí el croquis con medidas o pegá un link' },
     ],
   },
   // Etapa 4 — Cierre comercial (4A plata + 4B fechas + 4C documentación)
@@ -878,8 +878,8 @@ const FICHA_ETAPAS = [
       { key: 'fecha_colocacion_tentativa', label: 'Fecha de colocación tentativa', tipo: 'date', hint: 'Estimada, ajustable (para agenda de colocadores)' },
 
       { tipo: 'seccion', key: '_sec_4c', label: '4C · Documentación y cláusulas' },
-      { key: 'contrato_firmado', label: 'Contrato / presupuesto firmado (link)', tipo: 'url', requerido: true, placeholder: 'Link al PDF firmado' },
-      { key: 'comprobante_sena', label: 'Comprobante de seña (link)', tipo: 'url', requerido: true, placeholder: 'Recibo, captura de transferencia...' },
+      { key: 'contrato_firmado', label: 'Contrato / presupuesto firmado', tipo: 'archivo', requerido: true, placeholder: 'Subí el PDF firmado o pegá un link' },
+      { key: 'comprobante_sena', label: 'Comprobante de seña', tipo: 'archivo', requerido: true, placeholder: 'Subí el recibo/captura o pegá un link' },
       { key: 'clausulas', label: 'Cláusulas / condiciones especiales', tipo: 'textarea', placeholder: 'Ej: cliente provee mesada, incluye colocación, garantía 1 año en herrajes' },
       { key: 'notas_cierre', label: 'Notas del cierre', tipo: 'textarea', placeholder: 'Regateos, promesas, alertas — todo lo que conviene dejar por escrito' },
     ],
@@ -895,7 +895,7 @@ const FICHA_ETAPAS = [
       { key: 'fecha_fin_prod', label: 'Fin de producción', tipo: 'date', hint: 'Cuándo quedó producido' },
       { key: 'operario', label: 'Operario asignado', tipo: 'text', placeholder: 'Quién lo arma' },
       { key: 'notas_produccion', label: 'Notas de producción', tipo: 'textarea', placeholder: 'Cambios de color por stock, refuerzos, ajustes durante el armado' },
-      { key: 'fotos_terminado', label: 'Fotos del mueble terminado (links)', tipo: 'linklist', hint: 'Para mostrar al cliente antes de colocar' },
+      { key: 'fotos_terminado', label: 'Fotos del mueble terminado', tipo: 'archivolist', hint: 'Para mostrar al cliente antes de colocar. Subí las fotos o pegá links.' },
       { key: 'traba_motivo', label: 'Si está trabado: motivo', tipo: 'textarea', requerido: true, placeholder: 'Qué falta para destrabarlo', dependeDe: { campo: 'estado_mueble', valor: 'Trabado' } },
       { key: 'traba_necesita', label: 'Si está trabado: qué se necesita', tipo: 'text', requerido: true, placeholder: 'Acción concreta para resolver', dependeDe: { campo: 'estado_mueble', valor: 'Trabado' } },
       { key: 'traba_responsable', label: 'Si está trabado: responsable de destrabar', tipo: 'text', requerido: true, placeholder: 'Quién tiene que hacer algo', dependeDe: { campo: 'estado_mueble', valor: 'Trabado' } },
@@ -936,8 +936,8 @@ const FICHA_ETAPAS = [
       { key: 'cliente_conforme', label: '¿Cliente conforme?', tipo: 'radio', requerido: true, opciones: ['Sí', 'No', 'Parcial'] },
       { key: 'observaciones_cliente', label: 'Observaciones del cliente', tipo: 'textarea', requerido: true, placeholder: 'Qué reclamó, qué falta corregir', dependeDe: { campo: 'cliente_conforme', valor: ['No', 'Parcial'] } },
       { key: 'pendientes_postcoloc', label: 'Pendientes post-colocación', tipo: 'textarea', placeholder: 'Ej: tapa de cajón faltante, regular bisagras' },
-      { key: 'foto_colocado', label: 'Foto del mueble colocado (links)', tipo: 'linklist', requerido: true, min: 1, hint: 'Portfolio + comprobante de entrega' },
-      { key: 'conformidad_firmada', label: 'Conformidad firmada por cliente (link)', tipo: 'url', requerido: true, placeholder: 'Documento de cierre (PDF/imagen)' },
+      { key: 'foto_colocado', label: 'Foto del mueble colocado', tipo: 'archivolist', requerido: true, min: 1, hint: 'Portfolio + comprobante de entrega. Subí las fotos o pegá links.' },
+      { key: 'conformidad_firmada', label: 'Conformidad firmada por cliente', tipo: 'archivo', requerido: true, placeholder: 'Subí el documento de cierre o pegá un link' },
       { key: 'saldo_cobrado', label: '¿Saldo final cobrado?', tipo: 'radio', requerido: true, opciones: ['Sí', 'No'] },
       { key: 'fecha_cobro_saldo', label: 'Fecha cobro saldo', tipo: 'date', requerido: true, dependeDe: { campo: 'saldo_cobrado', valor: 'Sí' } },
       { key: 'forma_cobro_saldo', label: 'Forma de cobro del saldo', tipo: 'select', requerido: true, opciones: ['Efectivo', 'Transferencia', 'Cheque', 'MercadoPago', 'Tarjeta'], dependeDe: { campo: 'saldo_cobrado', valor: 'Sí' } },
@@ -1069,6 +1069,7 @@ function renderFichaEtapas() {
 
   // Re-bind componentes interactivos y abrir la primera etapa editable
   bindLinklists(cont);
+  bindArchivos(cont);
   bindConditionals(cont);
   bindCalculados(cont);
   const firstEditable = cont.querySelector('.ficha-etapa[data-etapa]');
@@ -1178,6 +1179,21 @@ function renderCampo(campo, valor, ns) {
       </div>`;
       break;
     }
+    case 'archivo':
+      // Subida real: se elige un archivo (se sube a Drive vía n8n) o se pega un link.
+      control = `<div class="ficha-archivo" data-key="${campo.key}">
+        ${archivoRow(strVal)}
+      </div>`;
+      break;
+    case 'archivolist': {
+      const arr = (Array.isArray(valor) ? valor : []).filter(Boolean);
+      const rows = (arr.length ? arr : ['']).map(v => archivoRow(v, true)).join('');
+      control = `<div class="ficha-archivolist" data-key="${campo.key}">
+        <div class="ficha-archivolist-rows">${rows}</div>
+        <button type="button" class="btn btn-sm btn-outline ficha-archivolist-add">+ Agregar archivo</button>
+      </div>`;
+      break;
+    }
     case 'datalist': {
       const listId = campo.opcionesRef === 'colores' ? 'colores-list' : '';
       control = `<input type="text" id="${id}" class="input" data-key="${campo.key}" list="${listId}" value="${escapeHtml(strVal)}" placeholder="${escapeHtml(campo.placeholder || '')}" autocomplete="off" />`;
@@ -1234,6 +1250,140 @@ function linklistRow(v) {
     <input type="url" class="input ficha-link-input" value="${escapeHtml(v || '')}" placeholder="https://drive.google.com/..." />
     <button type="button" class="btn-icon ficha-linklist-del" title="Quitar">&#10005;</button>
   </div>`;
+}
+
+// Fila de un campo de archivo: input con el link (lo llena la subida o se pega a
+// mano) + botón para elegir archivo + estado. `withDel` agrega el botón quitar
+// (sólo en listas múltiples `archivolist`).
+function archivoRow(v, withDel) {
+  return `<div class="ficha-archivo-item">
+    <div class="ficha-archivo-row">
+      <input type="url" class="input ficha-archivo-link" value="${escapeHtml(v || '')}" placeholder="Subí un archivo o pegá un link" />
+      <label class="btn btn-sm btn-outline ficha-archivo-btn" title="Elegir archivo">
+        <span class="ficha-archivo-btn-lbl">📎 Subir</span>
+        <input type="file" class="ficha-archivo-file" accept="image/*,application/pdf" hidden />
+      </label>
+      ${withDel ? '<button type="button" class="btn-icon ficha-archivolist-del" title="Quitar">&#10005;</button>' : ''}
+    </div>
+    <div class="ficha-archivo-status"></div>
+  </div>`;
+}
+
+function setArchStatus(el, msg, kind) {
+  if (!el) return;
+  el.textContent = msg || '';
+  el.className = 'ficha-archivo-status' + (kind ? ' is-' + kind : '');
+}
+
+// Lee un File del usuario y devuelve { base64, mime, filename } listo para el
+// webhook. Las imágenes se comprimen (canvas, máx 1600px, JPEG) para que el
+// payload no explote; el resto (PDF, etc.) va tal cual.
+function fileToPayload(file) {
+  return new Promise((resolve, reject) => {
+    const esImagen = /^image\//.test(file.type) && file.type !== 'image/svg+xml';
+    const reader = new FileReader();
+    if (!esImagen) {
+      reader.onload = () => resolve({
+        base64: String(reader.result).split(',')[1] || '',
+        mime: file.type || 'application/octet-stream',
+        filename: file.name || 'archivo',
+      });
+      reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+      reader.readAsDataURL(file);
+      return;
+    }
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1600;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          const s = Math.min(MAX / width, MAX / height);
+          width = Math.round(width * s);
+          height = Math.round(height * s);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        const base = (file.name || 'foto').replace(/\.[^.]+$/, '');
+        resolve({ base64: dataUrl.split(',')[1] || '', mime: 'image/jpeg', filename: base + '.jpg' });
+      };
+      img.onerror = () => reject(new Error('Imagen inválida'));
+      img.src = String(reader.result);
+    };
+    reader.onerror = () => reject(new Error('No se pudo leer la imagen'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// Sube el archivo elegido en un input file: lo manda al webhook (acción
+// subir_archivo) y, si vuelve el link, lo escribe en el input de link de esa fila.
+async function handleArchivoUpload(fileInput) {
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+  const item = fileInput.closest('.ficha-archivo-item');
+  const linkInput = item.querySelector('.ficha-archivo-link');
+  const statusEl = item.querySelector('.ficha-archivo-status');
+  const btnLbl = item.querySelector('.ficha-archivo-btn-lbl');
+  const proyectoId = currentFichaProyecto && currentFichaProyecto.proyecto_id;
+  if (!proyectoId) {
+    setArchStatus(statusEl, 'Guardá/abrí la ficha de un proyecto antes de subir', 'err');
+    fileInput.value = '';
+    return;
+  }
+  setArchStatus(statusEl, 'Subiendo…', 'load');
+  const orig = btnLbl ? btnLbl.textContent : '';
+  if (btnLbl) btnLbl.textContent = '⏳';
+  try {
+    const { base64, mime, filename } = await fileToPayload(file);
+    const resp = await sendToWebhook('subir_archivo', { proyecto_id: proyectoId, filename, mime, base64 });
+    if (resp && resp.ok !== false && resp.link) {
+      linkInput.value = resp.link;
+      setArchStatus(statusEl, '✓ ' + filename, 'ok');
+    } else {
+      setArchStatus(statusEl, (resp && resp.error) || 'No se pudo subir. Pegá el link a mano.', 'err');
+    }
+  } catch (err) {
+    setArchStatus(statusEl, 'Error al subir: ' + (err.message || err) + '. Pegá el link a mano.', 'err');
+  } finally {
+    if (btnLbl) btnLbl.textContent = orig;
+    fileInput.value = '';
+  }
+}
+
+// Engancha la subida de archivos (inputs file, agregar/quitar en listas).
+function bindArchivos(scope) {
+  scope.querySelectorAll('.ficha-archivo-file').forEach(inp => {
+    if (inp.dataset.bound) return;
+    inp.dataset.bound = '1';
+    inp.addEventListener('change', () => handleArchivoUpload(inp));
+  });
+  scope.querySelectorAll('.ficha-archivolist').forEach(al => {
+    if (al.dataset.bound) return;
+    al.dataset.bound = '1';
+    const rows = al.querySelector('.ficha-archivolist-rows');
+    al.querySelector('.ficha-archivolist-add').addEventListener('click', () => {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = archivoRow('', true);
+      const row = tmp.firstElementChild;
+      rows.appendChild(row);
+      bindArchivos(row);
+    });
+    al.addEventListener('click', (e) => {
+      const del = e.target.closest('.ficha-archivolist-del');
+      if (!del) return;
+      const allRows = rows.querySelectorAll('.ficha-archivo-item');
+      if (allRows.length > 1) {
+        del.closest('.ficha-archivo-item').remove();
+      } else {
+        const item = del.closest('.ficha-archivo-item');
+        item.querySelector('.ficha-archivo-link').value = '';
+        setArchStatus(item.querySelector('.ficha-archivo-status'), '');
+      }
+    });
+  });
 }
 
 // ========================================
@@ -1382,7 +1532,7 @@ function readCampos(container, campos) {
     if (campo.tipo === 'seccion') return; // no es dato
     const wrap = container.querySelector(`[data-key="${campo.key}"]`);
     if (!wrap) {
-      out[campo.key] = (campo.tipo === 'multiselect' || campo.tipo === 'linklist') ? [] : (campo.tipo === 'dim3' ? {} : '');
+      out[campo.key] = (campo.tipo === 'multiselect' || campo.tipo === 'linklist' || campo.tipo === 'archivolist') ? [] : (campo.tipo === 'dim3' ? {} : '');
       return;
     }
     switch (campo.tipo) {
@@ -1399,6 +1549,14 @@ function readCampos(container, campos) {
         break;
       case 'linklist':
         out[campo.key] = Array.from(wrap.querySelectorAll('.ficha-link-input')).map(i => i.value.trim()).filter(Boolean);
+        break;
+      case 'archivo': {
+        const inp = wrap.querySelector('.ficha-archivo-link');
+        out[campo.key] = inp ? (inp.value || '').trim() : '';
+        break;
+      }
+      case 'archivolist':
+        out[campo.key] = Array.from(wrap.querySelectorAll('.ficha-archivo-link')).map(i => i.value.trim()).filter(Boolean);
         break;
       case 'dim3': {
         const g = {};
@@ -1433,7 +1591,7 @@ function condActiva(campo, data) {
 
 function valorVacio(campo, v) {
   if (campo.tipo === 'multiselect') return !Array.isArray(v) || v.length === 0;
-  if (campo.tipo === 'linklist') {
+  if (campo.tipo === 'linklist' || campo.tipo === 'archivolist') {
     const n = Array.isArray(v) ? v.filter(Boolean).length : 0;
     return n < (campo.min || 1);
   }
@@ -1555,6 +1713,7 @@ function rerenderRepeater(etapaKey, muebles, openIndex) {
   if (!body) return;
   body.innerHTML = (etapa.desc ? `<p class="ficha-etapa-desc">${escapeHtml(etapa.desc)}</p>` : '') + renderEtapaRepeater(etapa, muebles);
   bindLinklists(body);
+  bindArchivos(body);
   bindConditionals(body);
   refreshEtapaStatus(etapaKey);
   if (openIndex != null) {

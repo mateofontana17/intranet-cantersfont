@@ -892,6 +892,31 @@
               },
               "renameOutput": true,
               "outputKey": "Guardar Detalle Proyecto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cond-subir-archivo",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "subir_archivo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Subir Archivo"
             }
           ]
         },
@@ -3892,6 +3917,68 @@
       ],
       "id": "resp-detalle-ok",
       "name": "Responder Detalle OK"
+    },
+    {
+      "parameters": {
+        "jsCode": "// subir_archivo — convierte el base64 del frontend en binario para Drive\nconst body = $json.body || $json;\nconst data = body.data || {};\nconst limpiar = s => (typeof s === 'string' ? s.trim() : '');\n\nconst proyecto_id = limpiar(data.proyecto_id);\nconst filename = limpiar(data.filename) || 'archivo';\nconst mime = limpiar(data.mime) || 'application/octet-stream';\nconst b64 = typeof data.base64 === 'string' ? data.base64 : '';\nif (!b64) throw new Error('Falta el contenido del archivo (base64)');\n\nconst buffer = Buffer.from(b64, 'base64');\nconst binary = await this.helpers.prepareBinaryData(buffer, filename, mime);\nreturn [{ json: { proyecto_id, filename }, binary: { data: binary } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        3120
+      ],
+      "id": "parsear-archivo",
+      "name": "Parsear Archivo"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "inputDataFieldName": "data",
+        "name": "={{ $json.filename }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        220,
+        3120
+      ],
+      "id": "subir-archivo-drive",
+      "name": "Subir Archivo a Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, link: ($json.webViewLink || ('https://drive.google.com/file/d/' + $json.id + '/view')), filename: $('Parsear Archivo').first().json.filename }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        3120
+      ],
+      "id": "resp-archivo-ok",
+      "name": "Responder Archivo OK"
     }
   ],
   "connections": {
@@ -4350,6 +4437,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Parsear Archivo",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -4630,6 +4724,28 @@
         [
           {
             "node": "Responder Detalle OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Archivo": {
+      "main": [
+        [
+          {
+            "node": "Subir Archivo a Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subir Archivo a Drive": {
+      "main": [
+        [
+          {
+            "node": "Responder Archivo OK",
             "type": "main",
             "index": 0
           }

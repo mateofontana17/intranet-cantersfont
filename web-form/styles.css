@@ -2237,6 +2237,32 @@ textarea.input {
 }
 .ficha-linklist-del:hover { border-color: var(--color-danger); color: var(--color-danger); }
 
+/* Campos de archivo (subida real a Drive o link pegado) */
+.ficha-archivolist-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.ficha-archivo-row { display: flex; gap: 8px; align-items: center; }
+.ficha-archivo-row .ficha-archivo-link { flex: 1; }
+.ficha-archivo-btn {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ficha-archivo-btn input[type="file"] { display: none; }
+.ficha-archivolist-del {
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  width: 38px; height: 38px;
+  cursor: pointer;
+}
+.ficha-archivolist-del:hover { border-color: var(--color-danger); color: var(--color-danger); }
+.ficha-archivo-status { font-size: 12px; margin-top: 4px; min-height: 14px; color: var(--color-text-muted); }
+.ficha-archivo-status.is-load { color: var(--color-text-muted); }
+.ficha-archivo-status.is-ok { color: var(--color-success, #16a34a); }
+.ficha-archivo-status.is-err { color: var(--color-danger, #dc2626); }
+
 .ficha-form-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
 
 /* Catálogos editables de los <select> (botón "+" para agregar/quitar opciones) */
